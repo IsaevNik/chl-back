@@ -1,0 +1,8 @@
+*.pyc
+logs/*
+api/migrations/*
+media/*
+static/*
+tmp/*
+checklines/settings.py
+db.sqlite3
