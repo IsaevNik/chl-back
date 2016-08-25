@@ -1,7 +1,7 @@
 from django.conf.urls import url, include
 
-from api.urls import web
+import support
 
 urlpatterns = [
-	url(r'^web/', include(web))
+    url(r'^support/', include(support))
 ]

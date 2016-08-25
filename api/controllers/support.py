@@ -4,17 +4,17 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from ..service.auth import auth
-from ..service.support import create_support_start
-from api.permissions import IsAdminOrReadOnly
-from .serializers.auth import AuthSerializer
-from .serializers.support import SupportSerializer, CreateSupportSerializer
+from ..service.support import create_support_start, create_support_finish, \
+     auth_support
+from api.permissions import IsAdminOrReadOnly, IsSupport
+from .serializers.support import SupportSerializer, CreateSupportStartSerializer, \
+    CreateSupportFinishSerializer, AuthSupportSerializer
 from ..utils.exceptions.commons import RequestValidationException
 from .renderers import JsonRenderer
 from api.models.support import Support
 
 
-class AuthView(APIView):
+class AuthSupportView(APIView):
     """
     Авторизация
     """
@@ -24,12 +24,13 @@ class AuthView(APIView):
 
     @staticmethod
     def post(request):
-        serializer = AuthSerializer(data=request.data)
+        serializer = AuthSupportSerializer(data=request.data)
         if serializer.is_valid():
-            token = auth(serializer.validated_data['email'], serializer.validated_data['password'])
+            token = auth_support(serializer.validated_data['email'], serializer.validated_data['password'])
             return Response({'token': token})
         else:
             raise RequestValidationException(serializer)
+
 
 class CreateSupportStartView(APIView):
     """
@@ -41,7 +42,7 @@ class CreateSupportStartView(APIView):
 
     @staticmethod
     def post(request):
-        serializer = CreateSupportSerializer(data=request.data)
+        serializer = CreateSupportStartSerializer(data=request.data)
         request_user = request.user
         if serializer.is_valid():
             token = create_support_start(serializer, request_user)
@@ -50,17 +51,37 @@ class CreateSupportStartView(APIView):
             raise RequestValidationException(serializer)
 
 
+class CreateSupportFinishView(APIView):
+    """
+    Второй этап создания объекта Support
+    """
+    authentication_classes = ()
+    permission_classes = ()
+    renderer_classes = (JsonRenderer,)
 
-class SupportView(APIView):
+    @staticmethod
+    def post(request):
+        serializer = CreateSupportFinishSerializer(data=request.data)
+        if serializer.is_valid():
+            create_support_finish(serializer)
+            return Response()
+        else:
+            raise RequestValidationException(serializer)
+
+
+class SupportListView(APIView):
     """
     Представление Support
     """
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsSupport)
     renderer_classes = (JsonRenderer,)
 
     @staticmethod
     def get(request):
-        supports = Support.objects.all()
+        supports = get_all_support()
         serializer = SupportSerializer(supports, many=True)
         return Response(serializer.data)
+
+
+

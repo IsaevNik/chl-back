@@ -6,7 +6,7 @@ from rest_framework.urlpatterns import format_suffix_patterns
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
 #    url(r'^login/$', AuthView.as_view(),
-    url(r'^api/web/', include('api.urls.web'))
+    url(r'^api/', include('api.urls'))
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
