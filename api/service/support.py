@@ -33,7 +33,6 @@ def create_support_start(serializer, request_user):
 
 @transaction.atomic
 def create_support_finish(serializer):
-
     token = serializer.validated_data['token']
     password = serializer.validated_data['password']
     email = serializer.validated_data['email']
@@ -57,7 +56,6 @@ def create_support_finish(serializer):
     support.save()
 
 
-
 def auth_support(email, password):
     user = User.objects.get(email=email)
     if user.check_password(password):
@@ -71,5 +69,14 @@ def auth_support(email, password):
     raise InvalidCredentialsException()
 
 
-def get_all_support():
-    return Support.objects.all()
+def update_support(support, serializer):
+    old_email = support.user.email
+    new_email = serializer.validated_data['email']
+    if (old_email != new_email) and (User.objects.filter(username=new_email).exists()):
+        raise EmailAlreadyExistException
+    support = serializer.update(support, serializer.validated_data)
+
+
+def delete_support(support):
+    user = Support.get_support_by_user(support.user)
+    user.delete()

@@ -11,4 +11,13 @@ class IsAdminOrReadOnly(permissions.BasePermission):
 
 class IsSupport(permissions.BasePermission):
     def has_permisson(self, request, view):
-        return Support.get_support_by_user(request.user).exists()
+        try:
+            Support.get_support_by_user(request.user)
+        except Support.DoesNotExist:
+            return False
+        return True
+
+
+class IsAdmin(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return Support.get_support_by_user(request.user).is_admin

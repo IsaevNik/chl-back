@@ -5,8 +5,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from ..service.support import create_support_start, create_support_finish, \
-     auth_support
-from api.permissions import IsAdminOrReadOnly, IsSupport
+     auth_support, update_support
+from ..service.base_service import get_all, get_object
+from api.permissions import IsAdminOrReadOnly, IsSupport, IsAdmin
 from .serializers.support import SupportSerializer, CreateSupportStartSerializer, \
     CreateSupportFinishSerializer, AuthSupportSerializer
 from ..utils.exceptions.commons import RequestValidationException
@@ -71,17 +72,40 @@ class CreateSupportFinishView(APIView):
 
 class SupportListView(APIView):
     """
-    Представление Support
+    Представление списка Support
     """
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsSupport)
+    permission_classes = (IsAdmin,)
     renderer_classes = (JsonRenderer,)
 
     @staticmethod
     def get(request):
-        supports = get_all_support()
+        supports = get_all(Support)
         serializer = SupportSerializer(supports, many=True)
         return Response(serializer.data)
 
 
+class SupportDetailView(APIView):
+    '''
+    Представление объекта Support
+    '''
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAdminOrReadOnly, )
+    renderer_classes = (JsonRenderer,)
 
+    def get(self, request, pk):
+        support = get_object(Support, pk)
+        serializer = SupportSerializer(support)
+        return Response(serializer.data)
+
+    def delete(self, request, pk):
+        support = get_object(Support, pk)
+        delete_user(support)
+        return Response()
+
+    def put(self, request, pk):
+        support = get_object(Support, pk)
+        serializer = CreateSupportStartSerializer(data=request.data)
+        if serializer.is_valid():
+            update_support(support, serializer)
+            return Response()

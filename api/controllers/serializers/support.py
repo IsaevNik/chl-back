@@ -23,25 +23,11 @@ class SupportSerializer(serializers.ModelSerializer):
     def get_role(self,obj):
         return obj.get_role_display()
 
-
-class AuthSupportSerializer(serializers.Serializer):
-    """
-    Сериализатор для авторизации Оператора
-    """
-    def create(self, validated_data):
-        raise RuntimeError("Wrong usage %s" % self.__class__.__name__)
-
-    def update(self, instance, validated_data):
-        raise RuntimeError("Wrong usage %s" % self.__class__.__name__)
-
-    email = serializers.CharField(max_length=100, required=True)
-    password = serializers.CharField(max_length=100)
-
     
 class CreateSupportStartSerializer(serializers.Serializer):
     '''
     Сериалайзер модели Support для создания объектов
-    класса Support
+    класса Support и обновления
     '''
     email = serializers.EmailField()
     first_name = serializers.CharField()
@@ -49,7 +35,6 @@ class CreateSupportStartSerializer(serializers.Serializer):
     role = serializers.IntegerField(default=2)
     post = serializers.CharField(required=False)
 
-    @transaction.atomic
     def create(self, validated_data, company):
         user = User(
             email=validated_data['email'],
@@ -63,8 +48,38 @@ class CreateSupportStartSerializer(serializers.Serializer):
             company=company)
         return support
 
+    @transaction.atomic
+    def update(self, support, validated_data):
+        s_user = support.user
+        s_user.username = validated_data['email']
+        s_user.email = validated_data['email']
+        s_user.last_name = validated_data['last_name']
+        s_user.first_name = validated_data['first_name']
+        s_user.save()
+
+        support.role = validated_data['role']
+        support.post = validated_data['post']
+        support.save()
+
 
 class CreateSupportFinishSerializer(serializers.Serializer):
+    '''
+    Сериализатор для завершения создания оператора
+    '''
     email = serializers.EmailField()
     password = serializers.CharField()
     token = serializers.CharField()
+
+
+class AuthSupportSerializer(serializers.Serializer):
+    """
+    Сериализатор для авторизации Оператора
+    """
+    def create(self, validated_data):
+        raise RuntimeError("Wrong usage %s" % self.__class__.__name__)
+
+    def update(self, instance, validated_data):
+        raise RuntimeError("Wrong usage %s" % self.__class__.__name__)
+
+    email = serializers.CharField(max_length=100, required=True)
+    password = serializers.CharField(max_length=100)
