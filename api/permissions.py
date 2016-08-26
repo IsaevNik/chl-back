@@ -22,3 +22,11 @@ class IsSupport(permissions.BasePermission):
 class IsAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         return Support.get_support_by_user(request.user).is_admin
+
+
+class IsAdminOrGroupSupport(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        support = Support.get_support_by_user(request.user)
+        if (request.method in permissions.SAFE_METHODS and 
+            obj.support == support) or support.is_admin:
+            return True
