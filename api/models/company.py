@@ -9,6 +9,7 @@ class Company(models.Model):
     contact_person_last_name = models.CharField(max_length=64)
     contact_person_phone = models.CharField(max_length=10, unique=True)
     address = models.CharField(max_length=255)
+    #TODO default logo url
     logo_img = models.CharField(max_length=100)
     screen = models.TextField(blank=True)
     invite_text = models.TextField(blank=True)
@@ -24,3 +25,20 @@ class Company(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    @property
+    def supports_left(self):
+        pass
+
+    @property
+    def agents_left(self):
+        pass
+
+    @property
+    def time_to_finish_subscription(self):
+        pass
+    
+    def save(self, *args, **kwargs):
+        super(Company, self).save(*args, **kwargs) 
+        return self
+        

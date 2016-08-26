@@ -12,6 +12,9 @@ from api.utils.exceptions.user import UsernameAlreadyExistException, \
     EmailAlreadyExistException, FamilyAlreadyExistException
 from api.utils.exceptions.auth import InvalidCredentialsException, \
     InvalidEmailException
+from api.utils.exceptions.admin import AdminDeleteException
+from rest_framework.exceptions import NotFound
+from base_service import get_all, get_object
 from api.models.company import Company
 from api.models.support import Support
 
@@ -27,32 +30,38 @@ def create_support_start(serializer, request_user):
     support = serializer.create(serializer.validated_data, company)
 
     token = hashlib.sha256(support.user.email + str(datetime.now())).hexdigest()
-    cache.set(token, pickle.dumps(support), 60*60*24*60)
+    cache.set(token, pickle.dumps(support), 60*60*24)
 
     return token
 
 @transaction.atomic
-def create_support_finish(serializer):
+def create_support_finish(serializer, is_admin=False):
+    '''
+    Окончание создания оператора, если функция выполняется в контексте 
+    создания регистрации компании, то is_admin=True
+    '''
     token = serializer.validated_data['token']
     password = serializer.validated_data['password']
     email = serializer.validated_data['email']
 
     support_ser = cache.get(token)
     support = pickle.loads(cache.get(token))
-    s_user = support.user
+
+    if support.user.email != email:
+        raise InvalidEmailException
+
     cache.delete(token)
 
-    if s_user.email != email:
-        raise InvalidEmailException()
+    if is_admin:
+        company = support.company.save()
+        support.company = company
 
-    user = User.objects.create(first_name=s_user.first_name,
-                               last_name=s_user.last_name,
-                               username=s_user.username,
-                               email=s_user.email)
+    support.user.save()
+    user = User.objects.get(email=email)
     user.set_password(password)
     user.save()
+
     support.user = user
-    
     support.save()
 
 
@@ -78,5 +87,32 @@ def update_support(support, serializer):
 
 
 def delete_support(support):
-    user = Support.get_support_by_user(support.user)
+    if support.is_admin:
+        raise AdminDeleteException
+    user = support.user
     user.delete()
+
+
+def get_all_supports_of_company(user):
+    company = Support.get_company_by_user(user)
+    return Support.objects.filter(company=company)
+
+
+def get_support(id, user):
+    company = Support.get_company_by_user(user)
+    support = get_object(Support, id)
+    if support.company != company:
+        raise NotFound()
+    return support
+    
+
+def get_support_by_user(user):
+    return Support.get_support_by_user(user)
+
+
+def is_support(user):
+    try:
+        support = Support.objects.get(user=user)
+    except Support.DoesNotExist:
+        return False   
+    return True

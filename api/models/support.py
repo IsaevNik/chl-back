@@ -20,7 +20,6 @@ class Support(models.Model):
     role = models.IntegerField(choices=ROLE_CHOICES, default=OPERATOR)
     post = models.CharField(max_length=100, blank=True)
 
-
     def __unicode__(self):
         return self.user.first_name + " " + self.user.last_name
 
@@ -28,7 +27,6 @@ class Support(models.Model):
     def name(self):
         return self.user.first_name + " " + self.user.last_name
     
-
     @property
     def is_admin(self):
         if self.role == 1:
@@ -38,3 +36,8 @@ class Support(models.Model):
     @staticmethod
     def get_support_by_user(user):
         return Support.objects.get(user=user)
+
+    @staticmethod
+    def get_company_by_user(user):
+        support = Support.objects.get(user=user)
+        return support.company

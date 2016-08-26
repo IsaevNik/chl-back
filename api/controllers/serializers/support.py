@@ -57,6 +57,8 @@ class CreateSupportStartSerializer(serializers.Serializer):
         s_user.first_name = validated_data['first_name']
         s_user.save()
 
+        #if support.is_admin and validated_data['role'] == 2:
+        #    raise ChangeAdminToSupportException
         support.role = validated_data['role']
         support.post = validated_data['post']
         support.save()

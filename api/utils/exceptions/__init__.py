@@ -10,5 +10,8 @@ errors = {
     'InvalidCredentialsException': u"Такого логина и пароля не существует",
     'UsernameAlreadyExistException': u"Пользователь с таким именем уже существует",
     'EmailAlreadyExistException': u"Пользователь с такой почтой уже существует",
-    'FamilyAlreadyExistException': u"У данного пользователя уже есть семья"
+    'FamilyAlreadyExistException': u"У данного пользователя уже есть семья",
+    'InvalidEmailException': u"Проверьте правильность введённого логина",
+    'AdminDeleteException': u"Нельзя удалить администратора",
+    'ChangeAdminToSupportException': u"Вы не можете поменять свою роль на 'Оператор'"
 }
