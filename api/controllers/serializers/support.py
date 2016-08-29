@@ -18,7 +18,7 @@ class SupportSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Support
-        fields = ('name', 'email', 'company', 'role', 'post')
+        fields = ('id', 'name', 'email', 'company', 'role', 'post')
 
     def get_role(self,obj):
         return obj.get_role_display()

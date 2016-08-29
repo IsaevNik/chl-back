@@ -4,36 +4,36 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .serializers.user_group import UserGroupSerializer, UserGroupCreateSerializer
-from ..service.user_group import create_group, get_all_groups_of_company, update_group, \
-    delete_group, get_group
+from .serializers.promo import PromoCreateSerializer, PromoSerializer
+from api.service.promo import create_promo, get_all_promo_of_company
 from api.permissions import IsAdmin, IsAdminOrGroupSupportAndReadOnly, IsAdminOrReadOnly
 from .renderers import JsonRenderer
 from ..utils.exceptions.commons import RequestValidationException
 
-class UserGroupListView(APIView):
+
+class PromoListView(APIView):
 
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsAdmin)
+    permission_classes = (IsAuthenticated, IsAdminOrGroupSupportAndReadOnly)
     renderer_classes = (JsonRenderer,)
 
     @staticmethod
     def post(request):
-        serializer = UserGroupCreateSerializer(data=request.data)
+        serializer = PromoCreateSerializer(data=request.data)
         if serializer.is_valid():
-            create_group(serializer, request.user)
+            create_promo(serializer, request.user)
             return Response()
         else:
             raise RequestValidationException(serializer)
 
     @staticmethod
     def get(request):
-        groups = get_all_groups_of_company(request.user)
-        serializer = UserGroupSerializer(groups, many=True)
+        promos = get_all_promo_of_company(request.user)
+        serializer = PromoSerializer(promos, many=True)
         return Response(serializer.data)
 
 
-class UserGroupDetailView(APIView):
+'''class UserGroupDetailView(APIView):
 
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsAdminOrGroupSupportAndReadOnly)
@@ -59,4 +59,4 @@ class UserGroupDetailView(APIView):
         group = get_group(id, request.user)
         self.check_object_permissions(self.request, group)
         delete_group(group)
-        return Response()
+        return Response()'''

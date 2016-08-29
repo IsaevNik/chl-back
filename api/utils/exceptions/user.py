@@ -11,3 +11,8 @@ class EmailAlreadyExistException(AbstractException):
 
 class FamilyAlreadyExistException(AbstractException):
     pass
+
+
+class LoginAlredyExistException(AbstractException):
+    pass
+        

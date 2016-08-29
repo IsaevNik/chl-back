@@ -13,5 +13,6 @@ errors = {
     'FamilyAlreadyExistException': u"У данного пользователя уже есть семья",
     'InvalidEmailException': u"Проверьте правильность введённого логина",
     'AdminDeleteException': u"Нельзя удалить администратора",
-    'ChangeAdminToSupportException': u"Вы не можете поменять свою роль на 'Оператор'"
+    'ChangeAdminToSupportException': u"Вы не можете поменять свою роль на 'Оператор'",
+    'LoginAlredyExistException': u"Пользователь с таким логином уже существует",
 }

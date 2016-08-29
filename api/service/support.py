@@ -7,13 +7,13 @@ from django.contrib.auth.models import User
 from django.core.cache import cache
 from rest_framework.authtoken.models import Token
 from django.db import transaction
+from rest_framework.exceptions import NotFound
 
 from api.utils.exceptions.user import UsernameAlreadyExistException, \
     EmailAlreadyExistException, FamilyAlreadyExistException
 from api.utils.exceptions.auth import InvalidCredentialsException, \
     InvalidEmailException
 from api.utils.exceptions.admin import AdminDeleteException
-from rest_framework.exceptions import NotFound
 from base_service import get_all, get_object
 from api.models.company import Company
 from api.models.support import Support
@@ -104,7 +104,7 @@ def get_support(id, user):
     if support.company != company:
         raise NotFound()
     return support
-    
+
 
 def get_support_by_user(user):
     return Support.get_support_by_user(user)

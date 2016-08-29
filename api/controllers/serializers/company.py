@@ -9,7 +9,7 @@ class CompanyFullSerializer(serializers.ModelSerializer):
     #TODO Добавить сведения о текущей подписке с датой окончания и тд.
     class Meta:
         model = Company
-        fields = ('name', 'contact_person_first_name', 'contact_person_last_name',
+        fields = ('id', 'name', 'contact_person_first_name', 'contact_person_last_name',
             'contact_person_phone', 'address', 'logo_img', 'screen', 'invite_text', 
             'checking_acc', 'bank_name', 'ogrn', 'inn', 'kpp', 'ur_address', 
             'available', 'task_left')
@@ -19,7 +19,7 @@ class CompanyPartSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Company
-        fields = ('name', 'logo_img', 'screen')
+        fields = ('id', 'name', 'logo_img', 'screen')
 
 class RegCompanyStartSerializer(serializers.Serializer):
     name = serializers.CharField()
