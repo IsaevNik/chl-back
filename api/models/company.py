@@ -20,7 +20,7 @@ class Company(models.Model):
     kpp = models.CharField(blank=True, max_length=12)
     ur_address = models.TextField(blank=True)
     available = models.BooleanField(default=True)
-    task_left = models.IntegerField(default=5)
+    task_left = models.IntegerField(blank=True)
 
 
     def __unicode__(self):

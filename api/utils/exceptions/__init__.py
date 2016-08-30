@@ -15,4 +15,9 @@ errors = {
     'AdminDeleteException': u"Нельзя удалить администратора",
     'ChangeAdminToSupportException': u"Вы не можете поменять свою роль на 'Оператор'",
     'LoginAlredyExistException': u"Пользователь с таким логином уже существует",
+    'SupportRoleException': u"Пользователя с данной ролью создать невозможно",
+    'WithoutGroupTaskCreateException': u"Вы можете создавать задания только для определённой группы",
+    'TaskLimitException': u"К сожалению вы израсходовали лимит заданий, предусмотренных вашим тарифом",
+    'StartTaskWithGroupException': u"Для создания стартового задания поле 'Группа' - не заполняется",
+    'StartTaskCreateException': u"Вы не можете создать вводное задание"
 }

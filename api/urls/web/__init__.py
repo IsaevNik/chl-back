@@ -7,6 +7,7 @@ from api.controllers.user_group import UserGroupListView, UserGroupDetailView
 from api.controllers.subscription_type import SubscriptionTypeListView
 from api.controllers.agent import AgentListView, AgentDetailView
 from api.controllers.promo import PromoListView
+from api.controllers.task import TaskListView
 
 
 urlpatterns = [
@@ -18,5 +19,6 @@ urlpatterns = [
     url(r'^user-groups/(?P<id>[0-9]+)/$', UserGroupDetailView.as_view()),
     url(r'^promos/$', PromoListView.as_view()),
     url(r'^agents/$', AgentListView.as_view()),
-    url(r'^agents/(?P<id>[0-9]+)/$', AgentDetailView.as_view())
+    url(r'^agents/(?P<id>[0-9]+)/$', AgentDetailView.as_view()),
+    url(r'^tasks/$', TaskListView.as_view())
 ]

@@ -33,6 +33,7 @@ class IsAdminOrGroupSupportAndReadOnly(permissions.BasePermission):
         else:
             return False
 
+
 class IsAdminOrGroupSupport(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         support = Support.get_support_by_user(request.user)
@@ -40,3 +41,8 @@ class IsAdminOrGroupSupport(permissions.BasePermission):
             return True
         else:
             return False
+
+
+class IsSuperAdmin(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return Support.get_support_by_user(request.user).is_superadmin

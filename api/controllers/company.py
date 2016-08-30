@@ -9,10 +9,10 @@ from .serializers.company import CompanyFullSerializer, CompanyPartSerializer, \
 from .serializers.support import CreateSupportFinishSerializer
 from ..utils.exceptions.commons import RequestValidationException
 from ..service.base_service import get_all, get_object
-from ..service.company import create_company_start, update_company
+from ..service.company import create_company_start, update_company, get_all_company
 from ..service.support import create_support_finish, get_support_by_user,\
     is_support
-from api.permissions import IsAdminOrReadOnly
+from api.permissions import IsAdminOrReadOnly, IsSuperAdmin
 from .renderers import JsonRenderer
 
 
@@ -41,6 +41,17 @@ class CompanyView(APIView):
         else:
             raise RequestValidationException(serializer)
 
+
+class CompanyStatisticView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsSuperAdmin)
+    renderer_classes = (JsonRenderer,)
+
+    @staticmethod
+    def get(request):
+        companies = get_all_company()
+        serializer = CompanyFullSerializer(companies, many=True)
+        return Response(serializer.data)
 
 
 class RegCompanyStartView(APIView):

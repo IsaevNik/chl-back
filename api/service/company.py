@@ -7,6 +7,7 @@ from api.controllers.serializers.support import CreateSupportStartSerializer
 from api.controllers.serializers.company import CompanyFullSerializer
 from django.contrib.auth.models import User
 from django.core.cache import cache
+from api.models.company import Company
 
 
 def create_company_start(company_serializer):
@@ -42,3 +43,7 @@ def update_company(company, serializer):
     old_information = serializer_for_write.data
 
     serializer.update(company, serializer.validated_data)
+
+
+def get_all_company():
+    return Company.objects.all()

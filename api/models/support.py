@@ -9,14 +9,21 @@ from company import Company
 class Support(models.Model):
     ADMIN = 1
     OPERATOR = 2
+    BOOKER = 3
+    SUPERADMIN = 4
+
     ROLE_CHOICES = (
         (ADMIN, 'Администратор'),
-        (OPERATOR, 'Оператор')
+        (OPERATOR, 'Оператор'),
+        (BOOKER, 'Бухгалтер'),
+        (SUPERADMIN, 'Супервизор')
     )
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     company = models.ForeignKey(Company, 
                                 related_name="supports",
-                                on_delete=models.CASCADE)
+                                on_delete=models.CASCADE,
+                                blank=True,
+                                null=True)
     role = models.IntegerField(choices=ROLE_CHOICES, default=OPERATOR)
     post = models.CharField(max_length=100, blank=True)
 
@@ -30,6 +37,18 @@ class Support(models.Model):
     @property
     def is_admin(self):
         if self.role == 1:
+            return True
+        return False
+
+    @property
+    def is_booker(self):
+        if self.role == 3:
+            return True
+        return False
+
+    @property
+    def is_superadmin(self):
+        if self.role == 4:
             return True
         return False
     

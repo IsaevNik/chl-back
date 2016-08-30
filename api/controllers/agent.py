@@ -45,6 +45,8 @@ class AgentListView(APIView):
     renderer_classes = (JsonRenderer,)
 
     def post(self, request):
+        print request.data
+        print request.POST
         serializer = CreateAgentStartSerializer(data=request.data)
         request_user = request.user
         if serializer.is_valid():

@@ -7,6 +7,8 @@ from .models.user_group import UserGroup
 from .models.subscription_type import SubscriptionType
 from .models.agent import Agent
 from .models.promo import Promo
+from .models.task import Task
+from .models.task_address import TaskAddress
 #from .models.subscription import Subscription
 
 
@@ -44,3 +46,5 @@ admin.site.register(UserGroup)
 admin.site.register(SubscriptionType, SubscriptionTypeAdmin)
 admin.site.register(Agent)
 admin.site.register(Promo)
+admin.site.register(Task)
+admin.site.register(TaskAddress)
