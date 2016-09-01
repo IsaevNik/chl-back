@@ -9,6 +9,7 @@ from .models.agent import Agent
 from .models.promo import Promo
 from .models.task import Task
 from .models.task_address import TaskAddress
+from .models.point_blank import PointBlank
 #from .models.subscription import Subscription
 
 
@@ -48,3 +49,4 @@ admin.site.register(Agent)
 admin.site.register(Promo)
 admin.site.register(Task)
 admin.site.register(TaskAddress)
+admin.site.register(PointBlank)

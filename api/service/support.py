@@ -19,6 +19,7 @@ from base_service import get_all, get_object
 from api.models.company import Company
 from api.models.support import Support
 from api.models.subscription_type import SubscriptionType
+from api.models.user_group import UserGroup
 
 
 def create_support_start(serializer, request_user):
@@ -124,3 +125,11 @@ def is_support(user):
     except Support.DoesNotExist:
         return False   
     return True
+
+
+def get_all_groups_of_support(support):
+    company = support.company
+    if support.is_admin:
+        return UserGroup.objects.filter(support__company=company)
+    else:
+        return UserGroup.objects.filter(support=support)

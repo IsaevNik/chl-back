@@ -19,5 +19,7 @@ errors = {
     'WithoutGroupTaskCreateException': u"Вы можете создавать задания только для определённой группы",
     'TaskLimitException': u"К сожалению вы израсходовали лимит заданий, предусмотренных вашим тарифом",
     'StartTaskWithGroupException': u"Для создания стартового задания поле 'Группа' - не заполняется",
-    'StartTaskCreateException': u"Вы не можете создать вводное задание"
+    'StartTaskCreateException': u"Вы не можете создать вводное задание",
+    'AddressNotExistException': u"Адрес и координаты должны быть заполнены",
+    'StartTaskAlreadyExist': u"Вводное задание уже существует, для начала удалите его"
 }

@@ -14,3 +14,9 @@ class StartTaskWithGroupException(AbstractException):
 
 class StartTaskCreateException(AbstractException):
     pass
+
+class AddressNotExistException(AbstractException):
+	pass
+
+class StartTaskAlreadyExist(AbstractException):
+	pass
