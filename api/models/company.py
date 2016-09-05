@@ -19,7 +19,6 @@ class Company(models.Model):
     inn = models.CharField(blank=True, max_length=12)
     kpp = models.CharField(blank=True, max_length=12)
     ur_address = models.TextField(blank=True)
-    available = models.BooleanField(default=True)
     task_left = models.IntegerField(blank=True)
 
 

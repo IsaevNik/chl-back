@@ -31,4 +31,8 @@ class Agent(models.Model):
     @property
     def name(self):
         return self.user.first_name + " " + self.user.last_name
+
+    @staticmethod
+    def get_agent_by_user(user):
+        return Agent.objects.get(user=user)
     

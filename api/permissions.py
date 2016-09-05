@@ -24,6 +24,15 @@ class IsAdmin(permissions.BasePermission):
         return Support.get_support_by_user(request.user).is_admin
 
 
+class IsAdminOrBooker(permissions.BasePermission):
+    def has_permission(self, request, view):
+        support = Support.get_support_by_user(request.user)
+        if support.is_admin or support.is_booker:
+            return True
+        else:
+            return False
+
+
 class IsAdminOrGroupSupportAndReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         support = Support.get_support_by_user(request.user)
@@ -46,3 +55,5 @@ class IsAdminOrGroupSupport(permissions.BasePermission):
 class IsSuperAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         return Support.get_support_by_user(request.user).is_superadmin
+
+

@@ -21,7 +21,6 @@ def get_data_for_task(json_task, user):
     data['is_start'] = json_task.get('is_start', 0)
     return data
 
-@transaction.atomic
 def create_task(serializer, support, group):
     '''
     Функция создания задания
@@ -50,16 +49,15 @@ def update_task(serializer, task, support, new_group):
     return task
 
 
-
-
-@transaction.atomic
-def reset_task(task, support):
-    #удаляем задание и возвращаем значение оставшихся заданий    
-    task.delete()
-    support.company.task_left += 1
-    support.company.save()
-
-
 def get_task(id):
     task = get_object(Task, id)
     return task
+
+
+def get_start_task_by_company(company):
+    try:
+        task = Task.objects.get(creater__company=company,
+                                is_start=True)
+        return task
+    except:
+        return None

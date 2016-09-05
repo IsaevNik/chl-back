@@ -45,7 +45,6 @@ class CreateAgentStartSerializer(serializers.Serializer):
     group_id = serializers.IntegerField()
     post = serializers.CharField(required=False)
 
-    @transaction.atomic
     def create(self, validated_data, company, user_group):
         user = User(
             username=validated_data['login'],
@@ -63,7 +62,6 @@ class CreateAgentStartSerializer(serializers.Serializer):
         agent.save()
         return agent
 
-    @transaction.atomic
     def update(self, agent, validated_data, group):
         a_user = agent.user
         a_user.username = validated_data['login']
@@ -76,3 +74,6 @@ class CreateAgentStartSerializer(serializers.Serializer):
         agent.save()
 
 
+class AuthAgentSerializer(serializers.Serializer):
+    login = serializers.CharField()
+    password = serializers.CharField()

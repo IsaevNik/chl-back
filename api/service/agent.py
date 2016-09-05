@@ -51,3 +51,11 @@ def update_agent(agent, serializer, group):
         raise LoginAlredyExistException
 
     serializer.update(agent, serializer.validated_data, group)
+
+
+def get_agent_by_user(user):
+    try:
+        agent = Agent.get_agent_by_user(user)
+    except Agent.DoesNotExist:
+        raise NotFound()
+    return agent

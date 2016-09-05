@@ -13,8 +13,8 @@ from .serializers.task import TaskCreateSerializer, GroupWithTaskSerializer, \
 from .serializers.task_address import TaskAddressCreateSerializer
 from .serializers.point_blank import PoinBlankCreateSerializer
 from api.forms import JsonReqForm
-from ..service.task import get_data_for_task, create_task, reset_task, get_task, \
-    update_task
+from ..service.task import get_data_for_task, create_task, get_task, \
+    update_task, get_start_task_by_company
 from ..service.user_group import get_group
 from ..service.support import get_support_by_user, get_all_groups_of_support
 from ..service.task_address import create_task_address, update_task_address, \
@@ -33,6 +33,7 @@ class TaskListView(APIView):
     permission_classes = (IsAuthenticated, IsAdminOrGroupSupport, IsSupport)
     renderer_classes = (JsonRenderer,)
 
+    @transaction.atomic
     def post(self, request):
         form = JsonReqForm(request.data)
         if not form.is_valid():
@@ -79,7 +80,6 @@ class TaskListView(APIView):
             if ta_serializer.is_valid():
                 create_task_address(ta_serializer, task, support)
             else:
-                reset_task(task, support)
                 raise RequestValidationException(ta_serializer)
 
         # работа с бланками заданий
@@ -88,7 +88,6 @@ class TaskListView(APIView):
             if b_serializer.is_valid():
                 create_blank(b_serializer, task)
             else:
-                reset_task(task, support)
                 raise RequestValidationException(b_serializer)
 
         return Response()
@@ -99,6 +98,21 @@ class TaskListView(APIView):
         groups = get_all_groups_of_support(support)
         serializer = GroupWithTaskSerializer(groups, many=True)
         return Response(serializer.data)
+
+class StartTaskView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, )
+    renderer_classes = (JsonRenderer,)
+
+    def get(self, request):
+        support = get_support_by_user(request.user)
+        company = support.company
+        start_task = get_start_task_by_company(company)
+        if start_task:
+            serializer = TaskSerializer(start_task)
+            return Response(serializer.data)
+        else:
+            return Response()
 
 
 class TaskDetailView(APIView):
@@ -122,7 +136,7 @@ class TaskDetailView(APIView):
         serializer = TaskSerializer(task)
         return Response(serializer.data)
 
-
+    @transaction.atomic
     def put(self, request, id):
         support = get_support_by_user(request.user)
         task = get_task(id)

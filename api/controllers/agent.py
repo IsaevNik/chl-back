@@ -3,23 +3,26 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.db import transaction
 
 from ..service.agent import create_agent_start, get_agent, delete_agent, \
-    update_agent
+    update_agent, get_agent_by_user
+
 from ..service.support import get_support_by_user
+from ..service.base_service import logout_user, auth_user
 from ..service.user_group import get_all_groups_of_company
 from ..service.user_group import get_group
 from api.permissions import IsAdminOrReadOnly, IsSupport, IsAdmin, IsAdminOrGroupSupport
 from .serializers.agent import CreateAgentStartSerializer, AgentSerializer, \
-    GroupWithAgentsSerializer
+    GroupWithAgentsSerializer, AuthAgentSerializer
 from ..utils.exceptions.commons import RequestValidationException
 from .renderers import JsonRenderer
 from api.models.support import Support
 
 
-'''class AuthSupportView(APIView):
+class AuthAgentView(APIView):
     """
-    Авторизация
+    Авторизация агента
     """
     authentication_classes = ()
     permission_classes = ()
@@ -27,13 +30,15 @@ from api.models.support import Support
 
     @staticmethod
     def post(request):
-        serializer = AuthSupportSerializer(data=request.data)
+        serializer = AuthAgentSerializer(data=request.data)
         if serializer.is_valid():
-            token = auth_support(serializer.validated_data['email'], 
+
+            token = auth_user(serializer.validated_data['login'], 
                                  serializer.validated_data['password'])
+            #TODO проверить первая ли авторизация агента, если да, уменьшить количестство агентов доступных для создания
             return Response({'token': token})
         else:
-            raise RequestValidationException(serializer)'''
+            raise RequestValidationException(serializer)
 
 
 class AgentListView(APIView):
@@ -44,9 +49,8 @@ class AgentListView(APIView):
     permission_classes = (IsAuthenticated, IsSupport, IsAdminOrGroupSupport)
     renderer_classes = (JsonRenderer,)
 
+    @transaction.atomic
     def post(self, request):
-        print request.data
-        print request.POST
         serializer = CreateAgentStartSerializer(data=request.data)
         request_user = request.user
         if serializer.is_valid():
@@ -84,6 +88,7 @@ class AgentDetailView(APIView):
         delete_agent(agent)
         return Response()
 
+    @transaction.atomic
     def put(self, request, id):
         serializer = CreateAgentStartSerializer(data=request.data)
         agent = get_agent(id, request.user)
@@ -99,84 +104,20 @@ class AgentDetailView(APIView):
         else:
             raise RequestValidationException(serializer)
 
-'''class CreateSupportFinishView(APIView):
-    """
-    Второй этап создания объекта Support
-    """
-    authentication_classes = ()
-    permission_classes = ()
-    renderer_classes = (JsonRenderer,)
 
-    @staticmethod
-    def post(request):
-        serializer = CreateSupportFinishSerializer(data=request.data)
-        if serializer.is_valid():
-            create_support_finish(serializer)
-            return Response()
-        else:
-            raise RequestValidationException(serializer)
-
-
-class SupportListView(APIView):
-    """
-    Представление списка Support
-    """
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsAdmin)
-    renderer_classes = (JsonRenderer,)
-
-    @staticmethod
-    def get(request):
-        supports = get_all_supports_of_company(request.user)
-        serializer = SupportSerializer(supports, many=True)
-        return Response(serializer.data)
-
-'''
-"""
-class SupportDetailView(APIView):
-    '''
-    Представление объекта Support
-    '''
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsAdmin)
-    renderer_classes = (JsonRenderer,)
-
-    @staticmethod
-    def get(request, id):
-        support = get_support(id, request.user)
-        serializer = SupportSerializer(support)
-        return Response(serializer.data)
-
-    @staticmethod
-    def delete(request, id):
-        support = get_support(id, request.user)
-        delete_support(support)
-        return Response()
-
-    @staticmethod
-    def put(request, id):
-        support = get_support(id, request.user)
-        serializer = CreateSupportStartSerializer(data=request.data)
-        if serializer.is_valid():
-            update_support(support, serializer)
-            return Response()
-        else:
-            raise RequestValidationException(serializer)
-
-
-
-class SupportProfileView(APIView):
-    '''
-    Работа оператора со своим профилем
-    '''
+class AgentProfileSerializer(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     renderer_classes = (JsonRenderer,)
 
     @staticmethod
-    def get(request):
-        support = get_support_by_user(request.user)
-        serializer = SupportSerializer(support)
+    def get( request):
+        agent = get_agent_by_user(request.user)
+        serializer = AgentSerializer(agent)
         return Response(serializer.data)
 
-"""
+    @staticmethod
+    def post(request):
+        logout_user(request.user)
+        return Response()
+

@@ -5,7 +5,6 @@ from datetime import datetime
 
 from django.contrib.auth.models import User
 from django.core.cache import cache
-from rest_framework.authtoken.models import Token
 from django.db import transaction
 from rest_framework.exceptions import NotFound
 
@@ -19,6 +18,7 @@ from base_service import get_all, get_object
 from api.models.company import Company
 from api.models.support import Support
 from api.models.subscription_type import SubscriptionType
+from api.models.subscription import Subscription
 from api.models.user_group import UserGroup
 
 
@@ -41,7 +41,7 @@ def create_support_start(serializer, request_user):
 
     return token
 
-@transaction.atomic
+
 def create_support_finish(serializer, is_admin=False):
     '''
     Окончание создания оператора, если функция выполняется в контексте 
@@ -60,10 +60,17 @@ def create_support_finish(serializer, is_admin=False):
     cache.delete(token)
 
     if is_admin:
-        start_task_limit = SubscriptionType.objects.get(price=0)
-        support.company.task_left = start_task_limit
+        start_sub_type = SubscriptionType.objects.get(price=0)
+        support.company.task_left = start_sub_type.task_limit
         company = support.company.save()
         support.company = company
+        Subscription.objects.create(
+            company=company,
+            start_dt=datetime.now(),
+            status=2,
+            subscription_type=start_sub_type
+        )
+
 
     support.user.save()
     user = User.objects.get(email=email)
@@ -72,19 +79,6 @@ def create_support_finish(serializer, is_admin=False):
 
     support.user = user
     support.save()
-
-
-def auth_support(email, password):
-    user = User.objects.get(email=email)
-    if user.check_password(password):
-        # http://stackoverflow.com/questions/20683824/how-can-i-change-existing-token-in-the-authtoken-of-django-rest-framework
-        try:
-            token = Token.objects.get(user=user)
-            token.delete()
-        except Token.DoesNotExist:
-            pass
-        return Token.objects.create(user=user).key
-    raise InvalidCredentialsException()
 
 
 def update_support(support, serializer):
@@ -116,7 +110,11 @@ def get_support(id, user):
 
 
 def get_support_by_user(user):
-    return Support.get_support_by_user(user)
+    try:
+        support = Support.get_support_by_user(user)
+    except Agent.DoesNotExist:
+        raise NotFound()
+    return support
 
 
 def is_support(user):
@@ -133,3 +131,5 @@ def get_all_groups_of_support(support):
         return UserGroup.objects.filter(support__company=company)
     else:
         return UserGroup.objects.filter(support=support)
+
+

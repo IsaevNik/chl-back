@@ -1,5 +1,4 @@
 # coding=utf-8
-from task import reset_task
 from ..utils.exceptions.task import AddressNotExistException
 from api.models.task_address import TaskAddress
 
@@ -10,7 +9,6 @@ def create_task_address(serializer, task, support):
        not (data['longitude'] or data['latitude'] or data['address']):
         serializer.create(serializer.data, task)
     else:
-        reset_task(task, support)
         raise AddressNotExistException
 
 

@@ -3,6 +3,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.db import transaction
 
 from .serializers.company import CompanyFullSerializer, CompanyPartSerializer, \
     RegCompanyStartSerializer, CompanyUpdateSerializer
@@ -77,6 +78,7 @@ class RegCompanyFinishView(APIView):
     renderer_classes = (JsonRenderer,)
 
     @staticmethod
+    @transaction.atomic
     def post(request):
         serializer = CreateSupportFinishSerializer(data=request.data)
         if serializer.is_valid():

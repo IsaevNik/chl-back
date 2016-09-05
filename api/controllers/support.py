@@ -3,10 +3,12 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.db import transaction
 
 from ..service.support import create_support_start, create_support_finish, \
-     auth_support, update_support, get_all_supports_of_company, get_support, \
+     update_support, get_all_supports_of_company, get_support, \
      delete_support, get_support_by_user
+from ..service.base_service import logout_user, auth_user
 from api.permissions import IsAdminOrReadOnly, IsSupport, IsAdmin
 from .serializers.support import SupportSerializer, CreateSupportStartSerializer, \
     CreateSupportFinishSerializer, AuthSupportSerializer
@@ -27,7 +29,7 @@ class AuthSupportView(APIView):
     def post(request):
         serializer = AuthSupportSerializer(data=request.data)
         if serializer.is_valid():
-            token = auth_support(serializer.validated_data['email'], 
+            token = auth_user(serializer.validated_data['email'], 
                                  serializer.validated_data['password'])
             return Response({'token': token})
         else:
@@ -43,6 +45,7 @@ class CreateSupportStartView(APIView):
     renderer_classes = (JsonRenderer,)
 
     @staticmethod
+
     def post(request):
         serializer = CreateSupportStartSerializer(data=request.data)
         request_user = request.user
@@ -62,6 +65,7 @@ class CreateSupportFinishView(APIView):
     renderer_classes = (JsonRenderer,)
 
     @staticmethod
+    @transaction.atomic
     def post(request):
         serializer = CreateSupportFinishSerializer(data=request.data)
         if serializer.is_valid():
@@ -107,6 +111,7 @@ class SupportDetailView(APIView):
         return Response()
 
     @staticmethod
+    @transaction.atomic
     def put(request, id):
         support = get_support(id, request.user)
         serializer = CreateSupportStartSerializer(data=request.data)
@@ -132,3 +137,7 @@ class SupportProfileView(APIView):
         serializer = SupportSerializer(support)
         return Response(serializer.data)
 
+    @staticmethod
+    def post(request):
+        logout_user(request.user)
+        return Response()

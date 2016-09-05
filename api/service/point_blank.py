@@ -1,7 +1,6 @@
 # coding=utf-8
 import json
 
-from task import reset_task
 from api.models.point_blank import PointBlank
 
 def create_blank(serializer, task):

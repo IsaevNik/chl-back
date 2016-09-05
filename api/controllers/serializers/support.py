@@ -1,7 +1,6 @@
 # coding=utf-8
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from django.db import transaction
 
 from api.models.support import Support
 
@@ -48,7 +47,7 @@ class CreateSupportStartSerializer(serializers.Serializer):
             company=company)
         return support
 
-    @transaction.atomic
+    
     def update(self, support, validated_data):
         s_user = support.user
         s_user.username = validated_data['email']

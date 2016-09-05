@@ -21,5 +21,6 @@ errors = {
     'StartTaskWithGroupException': u"Для создания стартового задания поле 'Группа' - не заполняется",
     'StartTaskCreateException': u"Вы не можете создать вводное задание",
     'AddressNotExistException': u"Адрес и координаты должны быть заполнены",
-    'StartTaskAlreadyExist': u"Вводное задание уже существует, для начала удалите его"
+    'StartTaskAlreadyExist': u"Вводное задание уже существует, для начала удалите его",
+    'OrderNotExistException': u"Ошибка регистрации платежа"
 }

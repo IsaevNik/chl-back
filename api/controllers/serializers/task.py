@@ -14,6 +14,11 @@ class TaskSerializer(serializers.ModelSerializer):
     creater = serializers.CharField(source='creater.name')
     task_addresses = TaskAddressSerializer(many=True, read_only=True)
     blanks = PointBlankSerializer(many=True, read_only=True)
+    finish_dt = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S")
+    start_dt = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S")
+    release_dt = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S")
+    create_dt = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S")
+    last_edit_dt = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S")
 
     class Meta:
         model = Task
