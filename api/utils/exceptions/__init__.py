@@ -22,5 +22,7 @@ errors = {
     'StartTaskCreateException': u"Вы не можете создать вводное задание",
     'AddressNotExistException': u"Адрес и координаты должны быть заполнены",
     'StartTaskAlreadyExist': u"Вводное задание уже существует, для начала удалите его",
-    'OrderNotExistException': u"Ошибка регистрации платежа"
+    'OrderNotExistException': u"Ошибка регистрации платежа",
+    'SupportLimitException': u"Достигнут лимит количества операторов, предусмотренный вашим тарифом",
+    'AgentLimitException': u"Достигнут лимит количества агентов, предусмотренный вашим тарифом",
 }

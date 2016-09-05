@@ -13,6 +13,7 @@ from api.utils.exceptions.user import UsernameAlreadyExistException, \
 from api.utils.exceptions.auth import InvalidCredentialsException, \
     InvalidEmailException
 from api.utils.exceptions.registration import SupportRoleException
+from api.utils.exceptions.company import SupportLimitException
 from api.utils.exceptions.admin import AdminDeleteException
 from base_service import get_all, get_object
 from api.models.company import Company
@@ -27,13 +28,18 @@ def create_support_start(serializer, request_user):
     Создание экземпляра класса Support, сериализация его и запись в кеш 
     и отправка токена на фронт для создания ссылки подтверждения почты
     '''
+
     if User.objects.filter(username=serializer.validated_data['email']).exists():
         raise EmailAlreadyExistException
+    
+    company = (Support.get_support_by_user(request_user)).company
+    if company.supports_left < 1:
+        raise SupportLimitException
 
     if serializer.validated_data['role'] in [1,3,4]:
         raise SupportRoleException
 
-    company = (Support.get_support_by_user(request_user)).company
+    
     support = serializer.create(serializer.validated_data, company)
 
     token = hashlib.sha256(support.user.email + str(datetime.now())).hexdigest()

@@ -5,6 +5,7 @@ from datetime import datetime
 
 from django.contrib.auth.models import User
 from api.utils.exceptions.user import LoginAlredyExistException
+from api.utils.exceptions.company import AgentLimitException
 from rest_framework.exceptions import NotFound
 
 from api.models.agent import Agent
@@ -14,10 +15,12 @@ from base_service import get_object
 
 
 def create_agent_start(serializer, request_user):
+    company = Support.get_company_by_user(request_user)
+    if company.agents_left < 1:
+        raise AgentLimitException
+
     if User.objects.filter(username=serializer.validated_data['login']).exists():
         raise LoginAlredyExistException
-
-    company = Support.get_company_by_user(request_user)
 
     try:
         user_group = UserGroup.objects.get(id=serializer.validated_data['group_id'])

@@ -13,6 +13,7 @@ class AgentSerializer(serializers.ModelSerializer):
     данных связанных с моделью
     '''
     login = serializers.CharField(source='user.username')
+    company = serializers.CharField(source='company.name')
 
     class Meta:
         model = Agent

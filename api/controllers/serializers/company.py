@@ -6,12 +6,15 @@ from api.models.company import Company
 
 
 class CompanyFullSerializer(serializers.ModelSerializer):
-    #TODO Добавить сведения о текущей подписке с датой окончания и тд.
+
+    sub_type = serializers.CharField(source='active_subscription.subscription_type.title')
+    end_dt = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S", source='active_subscription.end_dt')
     class Meta:
         model = Company
-        fields = ('id', 'name', 'contact_person_first_name', 'contact_person_last_name',
-            'contact_person_phone', 'address', 'logo_img', 'screen', 'invite_text', 
-            'checking_acc', 'bank_name', 'ogrn', 'inn', 'kpp', 'ur_address', 'task_left')
+        fields = ('id', 'name', 'sub_type', 'end_dt', 'task_left', 'agents_left', 'active_agents',
+            'invited_agents', 'supports_left', 'supports_now', 'contact_person_first_name', 
+            'contact_person_last_name', 'contact_person_phone', 'address', 'logo_img', 
+            'screen', 'invite_text', 'checking_acc', 'bank_name', 'ogrn', 'inn', 'kpp', 'ur_address')
 
 
 class CompanyPartSerializer(serializers.ModelSerializer):
