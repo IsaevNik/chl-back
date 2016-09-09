@@ -1,6 +1,7 @@
 from rest_framework import permissions
 
 from api.models.support import Support
+from api.models.agent import Agent
 
 
 class IsAdminOrReadOnly(permissions.BasePermission):
@@ -69,3 +70,14 @@ class IsSupport(permissions.BasePermission):
         if support.is_booker:
             return False
         return True
+
+
+class IsThisGroupMember(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj): 
+        agent = Agent.get_agent_by_user(request.user)
+        if not obj:
+            return True
+        if agent.group == obj:
+            return True
+        else:
+            return False

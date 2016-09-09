@@ -1,5 +1,5 @@
 # coding=utf-8
-from django.db import transaction
+from django.db import transaction, connection
 
 from api.models.task import Task
 from api.models.task_address import TaskAddress
@@ -7,6 +7,7 @@ from api.models.point_blank import PointBlank
 from api.utils.exceptions.task import TaskLimitException
 from base_service import get_object
 from ..utils.exceptions.task import StartTaskAlreadyExist
+from agent import get_agent_by_user
 
 
 def get_data_for_task(json_task, user):
@@ -58,6 +59,56 @@ def get_start_task_by_company(company):
     try:
         task = Task.objects.get(creater__company=company,
                                 is_start=True)
-        return task
+        task_address = task.task_addresses.get()
+        return task_address
     except:
         return None
+
+
+def get_tasks_without_address(user):
+    agent = get_agent_by_user(user)
+    group = agent.group
+    tasks = []
+    with connection.cursor() as cursor:
+        # datetime("NOW", "localtime") -> NOW()
+        sql = \
+            'SELECT task.id, address.id FROM api_task AS task, api_taskaddress as address WHERE '\
+            'task.group_id={0} AND address.task_id=task.id AND address.amount>0 AND task.start_dt<datetime("NOW", "localtime") ' \
+            'AND task.finish_dt>datetime("NOW", "localtime") AND address.longitude IS NULL ORDER BY task.id;'
+        cursor.execute(sql.format(group.id))
+        for raw in cursor.fetchall():
+            address_id = raw[1]
+            #TODO добавить проверку, есть ли во взятых это задание
+            tasks.append(TaskAddress.objects.get(id=address_id))
+        return tasks
+
+def get_tasks_with_address(data, user):
+    agent = get_agent_by_user(user)
+    group = agent.group
+
+    longitude = data['longitude']
+    latitude = data['latitude']
+
+    tasks = []
+    with connection.cursor() as cursor:
+        # datetime("NOW", "localtime") -> NOW()
+        """sql = \
+            'SELECT task.id, address.id, distance(address.latitude, address.longitude, {0}, {1}) AS distance '\
+            'FROM api_task AS task, api_taskaddress as address WHERE task.group_id={2} AND address.task_id=task.id '\
+            'AND address.amount>0 AND task.start_dt<datetime("NOW", "localtime") AND ' \
+            'task.finish_dt>datetime("NOW", "localtime") AND address.longitude IS NOT NULL ORDER BY distance;'
+        cursor.execute(sql.format(latitude, longitude, group.id))"""
+        sql = \
+            'SELECT task.id, address.id '\
+            'FROM api_task AS task, api_taskaddress as address WHERE task.group_id={0} AND address.task_id=task.id '\
+            'AND address.amount>0 AND task.start_dt<datetime("NOW", "localtime") AND ' \
+            'task.finish_dt>datetime("NOW", "localtime") AND address.longitude IS NOT NULL;'
+        cursor.execute(sql.format(group.id))
+        for raw in cursor.fetchall():
+            address_id = raw[1]
+            #TODO добавить проверку, есть ли во взятых это задание
+            task = TaskAddress.objects.get(id=address_id)
+            task.set_distance(longitude, latitude)
+            tasks.append(task)
+        return tasks
+

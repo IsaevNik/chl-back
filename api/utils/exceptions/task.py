@@ -26,3 +26,6 @@ class DoesNotSelectImageException(AbstractException):
 
 class InvalidTypeOfImgException(AbstractException):
 	pass
+
+class TaskTimeException(AbstractException):
+	pass

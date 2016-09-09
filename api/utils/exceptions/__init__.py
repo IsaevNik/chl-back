@@ -27,4 +27,5 @@ errors = {
     'AgentLimitException': u"Достигнут лимит количества агентов, предусмотренный вашим тарифом",
     'DoesNotSelectImageException': u"Изображение не выбрано",
     'InvalidTypeOfImgException': u"Недопустимый тип файла, допустимый: *.png",
+    'TaskTimeException': u"Вы не можете просматривать просроченные задания",
 }

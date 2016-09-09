@@ -11,6 +11,7 @@ from ..service.support import get_support_by_user
 from ..service.base_service import logout_user, auth_user, get_user_by_token
 from ..service.user_group import get_all_groups_of_company
 from ..service.user_group import get_group
+from ..service.task import get_start_task_by_company
 from api.permissions import IsAdminOrReadOnly, IsSupport, IsAdmin, \
     IsAdminOrGroupSupport, IsSuperAdmin
 from .serializers.agent import CreateAgentStartSerializer, AgentSerializer, \
@@ -41,7 +42,8 @@ class LoginAgentView(APIView):
             if is_first_auth(agent):
                 serializer = FirstAuthAgentSerializer(data=request.data)
                 if serializer.is_valid():
-                    data = set_agent_device(agent, serializer)
+                    start_task = get_start_task_by_company(agent.company)
+                    data = set_agent_device(agent, serializer, start_task)
                 else:
                     raise RequestValidationException(serializer)
             data['token'] = token

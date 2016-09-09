@@ -1,7 +1,9 @@
 # coding=utf-8
-from ..utils.exceptions.task import AddressNotExistException
-from api.models.task_address import TaskAddress
+from django.utils import timezone
 
+from ..utils.exceptions.task import AddressNotExistException, TaskTimeException
+from api.models.task_address import TaskAddress
+from base_service import get_object
 
 def create_task_address(serializer, task, support):
     data = serializer.validated_data
@@ -31,3 +33,11 @@ def delete_task_addresses(ids):
         task_address.delete()
 
     
+def get_task_address(id):
+    task = get_object(TaskAddress, id)
+    return task
+
+def is_task_available(task_address):
+    task = task_address.task
+    if timezone.now() > task.finish_dt:
+        raise TaskTimeException()

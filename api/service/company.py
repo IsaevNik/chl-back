@@ -47,3 +47,4 @@ def update_company(company, serializer):
 
 def get_all_company():
     return Company.objects.all()
+

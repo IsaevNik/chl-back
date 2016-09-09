@@ -7,3 +7,8 @@ class JsonReqForm(forms.Form):
 
 class UploadFileForm(forms.Form):
     file  = forms.FileField()
+
+class TaskDistanceForm(forms.Form):
+    latitude = forms.FloatField()
+    longitude = forms.FloatField()
+#   page = forms.IntegerField(required=False)

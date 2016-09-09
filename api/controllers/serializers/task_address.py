@@ -39,4 +39,25 @@ class TaskAddressCreateSerializer(serializers.Serializer):
         task_address.save()
 
     
+class TaskWithoutAddressSerializer(serializers.ModelSerializer):
+
+
+    title = serializers.CharField(source='task.title')
+    client_name = serializers.CharField(source='task.client_name')
+    price = serializers.IntegerField(source='task.price')
+    description = serializers.CharField(source='task.description')
+    start_dt = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S", source='task.start_dt')
+    finish_dt = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S", source='task.finish_dt')
+
+
+    class Meta:
+        model = TaskAddress
+        fields = ('id', 'title', 'client_name', 'price', 'description', 'start_dt', 'finish_dt')
+
+class TaskWithAddressSerializer(TaskWithoutAddressSerializer):
+
+    class Meta:
+        model = TaskAddress
+        fields = ('id', 'title', 'client_name', 'price', 'description', 'start_dt', 'finish_dt', \
+            'latitude', 'longitude', 'address', 'distance')
 
