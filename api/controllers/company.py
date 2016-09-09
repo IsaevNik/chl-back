@@ -3,6 +3,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.exceptions import PermissionDenied
 from django.db import transaction
 
 from .serializers.company import CompanyFullSerializer, CompanyPartSerializer, \
@@ -29,7 +30,11 @@ class CompanyView(APIView):
         if is_support(user):
             support = get_support_by_user(user)
             serializer = CompanyFullSerializer(support.company)
-        return Response(serializer.data)
+            return Response(serializer.data)
+        else:
+            #TODO для пользователей предоставить минимальную инфу о компании 
+            #(возможно тут как раз будет лого и тд)
+            raise PermissionDenied()
 
     @staticmethod
     def put(request):

@@ -28,9 +28,13 @@ class TaskSerializer(serializers.ModelSerializer):
             'blanks', 'task_addresses')
 
 
+class TaskForManySerializer(TaskSerializer):
+    task_addresses = serializers.IntegerField(source='task_adresses_count')
+
+
 class GroupWithTaskSerializer(serializers.ModelSerializer):
 
-    tasks = TaskSerializer(many=True, read_only=True)
+    tasks = TaskForManySerializer(many=True, read_only=True)
     group_name = serializers.CharField(source='name')
     class Meta:
         model = UserGroup

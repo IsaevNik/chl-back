@@ -20,3 +20,9 @@ class AddressNotExistException(AbstractException):
 
 class StartTaskAlreadyExist(AbstractException):
     pass
+
+class DoesNotSelectImageException(AbstractException):
+	pass
+
+class InvalidTypeOfImgException(AbstractException):
+	pass

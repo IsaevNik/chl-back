@@ -13,7 +13,8 @@ class SupportSerializer(serializers.ModelSerializer):
     name = serializers.CharField()
     email = serializers.EmailField(source='user.email')
     role = serializers.SerializerMethodField()
-    post = serializers.CharField(required=False)  
+    post = serializers.CharField(required=False)
+    company = serializers.CharField(source='company.name')  
 
     class Meta:
         model = Support

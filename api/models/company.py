@@ -9,8 +9,8 @@ class Company(models.Model):
     contact_person_last_name = models.CharField(max_length=64)
     contact_person_phone = models.CharField(max_length=10, unique=True)
     address = models.CharField(max_length=255)
-    #TODO default logo url
-    logo_img = models.CharField(max_length=100)
+    logo_img = models.CharField(max_length=100, default='img/default_logo.png')
+    #TODO rename screens
     screen = models.TextField(blank=True)
     invite_text = models.TextField(blank=True)
     checking_acc =  models.CharField(blank=True, max_length=12)
@@ -34,12 +34,12 @@ class Company(models.Model):
         active_subscription = filter(lambda sub: sub.status == 2, all_subscriptions)[0]
         return active_subscription
 
-
+    #поллучить данные о активной на текущий момент подписке
     @property
     def active_subscription(self):
-        return self._get_active_subscription
+        return self._get_active_subscription()
     
-
+    #количество операторов, которое ещё можно пригласить
     @property
     def supports_left(self):
         support_limit = self._get_active_subscription().subscription_type.support_limit
@@ -47,7 +47,7 @@ class Company(models.Model):
 
         return support_limit - now_supports_sum
 
-
+    #количество агентов, которое ещё можно пригласить
     @property
     def agents_left(self):
         agent_limit = self._get_active_subscription().subscription_type.user_limit
@@ -55,23 +55,24 @@ class Company(models.Model):
 
         return agent_limit - now_agents_sum
 
-
+    #сколько времени осталось до окончания подписки
     @property
     def time_to_finish_subscription(self):
         active_subscription = self._get_active_subscription()
         return active_subscription.end_dt
     
-
+    #количество операторов на текущий момент
     @property
     def supports_now(self):
         return len(self.supports.all())
 
-
+    #количество приглашённых агентов 
     @property
     def invited_agents(self):
         return len(self.agents.all())
 
 
+    #количество активных агентов (которые хотя бы 1 раз авторизовались)
     @property
     def active_agents(self):
         return len(filter(lambda agent: agent.platform, self.agents.all()))

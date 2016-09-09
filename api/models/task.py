@@ -26,3 +26,6 @@ class Task(models.Model):
     def __unicode__(self):
         return str(self.id)
 
+    @property
+    def task_adresses_count(self):
+        return len(self.task_addresses.all())

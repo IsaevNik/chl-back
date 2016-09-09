@@ -103,8 +103,12 @@ def delete_support(support):
 
 
 def get_all_supports_of_company(user):
-    company = Support.get_company_by_user(user)
-    return Support.objects.filter(company=company)
+    support = Support.get_support_by_user(user)
+    if support.is_superadmin:
+        return Support.objects.all()
+    else:
+        company = Support.get_company_by_user(user)
+        return Support.objects.filter(company=company)
 
 
 def get_support(id, user):
@@ -139,3 +143,4 @@ def get_all_groups_of_support(support):
         return UserGroup.objects.filter(support=support)
 
 
+    

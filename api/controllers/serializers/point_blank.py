@@ -1,4 +1,5 @@
 # coding=utf-8
+import json
 from rest_framework import serializers
 from django.db import transaction
 
@@ -8,6 +9,7 @@ from api.models.point_blank import PointBlank
 class PointBlankSerializer(serializers.ModelSerializer):
 
     type = serializers.SerializerMethodField()
+    content = serializers.SerializerMethodField()
 
     class Meta:
         model = PointBlank
@@ -16,6 +18,15 @@ class PointBlankSerializer(serializers.ModelSerializer):
 
     def get_type(self,obj):
         return obj.get_type_display()
+
+
+    def get_content(self, obj):
+        if obj.type == 2:
+            data = []
+            data.append(json.loads(obj.content))
+            return data
+        else:
+            return obj.content
 
 class PoinBlankCreateSerializer(serializers.Serializer):
 

@@ -1,4 +1,6 @@
 # coding=utf-8
+import json
+
 from rest_framework import serializers
 from django.db import transaction
 
@@ -9,6 +11,8 @@ class CompanyFullSerializer(serializers.ModelSerializer):
 
     sub_type = serializers.CharField(source='active_subscription.subscription_type.title')
     end_dt = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S", source='active_subscription.end_dt')
+    screen = serializers.SerializerMethodField()
+
     class Meta:
         model = Company
         fields = ('id', 'name', 'sub_type', 'end_dt', 'task_left', 'agents_left', 'active_agents',
@@ -16,12 +20,15 @@ class CompanyFullSerializer(serializers.ModelSerializer):
             'contact_person_last_name', 'contact_person_phone', 'address', 'logo_img', 
             'screen', 'invite_text', 'checking_acc', 'bank_name', 'ogrn', 'inn', 'kpp', 'ur_address')
 
+    def get_screen(self, obj):
+        data = json.loads(obj.screen)
+        return data
 
 class CompanyPartSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Company
-        fields = ('id', 'name', 'logo_img', 'screen')
+        fields = ('id', 'name', 'logo_img')
 
 class RegCompanyStartSerializer(serializers.Serializer):
     name = serializers.CharField()
@@ -51,7 +58,7 @@ class CompanyUpdateSerializer(serializers.Serializer):
     contact_person_last_name = serializers.CharField()
     contact_person_phone = serializers.CharField()
     address = serializers.CharField()
-    logo_img = serializers.CharField()
+    logo_img = serializers.CharField(default="img/default_logo.png")
     screen = serializers.CharField()
     invite_text = serializers.CharField()
     checking_acc =  serializers.CharField()

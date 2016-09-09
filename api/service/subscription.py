@@ -10,6 +10,7 @@ from api.models.subscription_type import SubscriptionType
 from api.models.company import Company
 from base_service import get_object
 
+
 def create_subscription(serializer, support):
     data = serializer.validated_data
     if support.is_booker:
@@ -28,7 +29,7 @@ def create_subscription(serializer, support):
         return sub_id 
 
 def get_all_subscriptions(support):
-    if support.is_booker:
+    if support.is_booker or support.is_superadmin:
         subscriptions = Subscription.objects.all().order_by('status','-purchase_dt')
     elif support.is_admin:
         company = support.company

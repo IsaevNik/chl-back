@@ -9,7 +9,7 @@ from ..service.support import create_support_start, create_support_finish, \
      update_support, get_all_supports_of_company, get_support, \
      delete_support, get_support_by_user
 from ..service.base_service import logout_user, auth_user
-from api.permissions import IsAdminOrReadOnly, IsSupport, IsAdmin
+from api.permissions import IsAdminOrReadOnly, IsSupport, IsAdmin, IsAdminOrSuperAdmin
 from .serializers.support import SupportSerializer, CreateSupportStartSerializer, \
     CreateSupportFinishSerializer, AuthSupportSerializer
 from ..utils.exceptions.commons import RequestValidationException
@@ -41,7 +41,7 @@ class CreateSupportStartView(APIView):
     Первый этап создания объекта Support
     """
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsAdminOrReadOnly)
+    permission_classes = (IsAuthenticated, IsAdmin)
     renderer_classes = (JsonRenderer,)
 
     @staticmethod
@@ -80,7 +80,7 @@ class SupportListView(APIView):
     Представление списка Support
     """
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsAdmin)
+    permission_classes = (IsAuthenticated, IsAdminOrSuperAdmin)
     renderer_classes = (JsonRenderer,)
 
     @staticmethod
@@ -141,3 +141,4 @@ class SupportProfileView(APIView):
     def post(request):
         logout_user(request.user)
         return Response()
+

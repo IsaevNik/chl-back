@@ -6,21 +6,21 @@ from rest_framework.views import APIView
 from django.db import transaction
 
 from ..service.agent import create_agent_start, get_agent, delete_agent, \
-    update_agent, get_agent_by_user
-
+    update_agent, get_agent_by_user, get_all_agents, is_first_auth, set_agent_device
 from ..service.support import get_support_by_user
-from ..service.base_service import logout_user, auth_user
+from ..service.base_service import logout_user, auth_user, get_user_by_token
 from ..service.user_group import get_all_groups_of_company
 from ..service.user_group import get_group
-from api.permissions import IsAdminOrReadOnly, IsSupport, IsAdmin, IsAdminOrGroupSupport
+from api.permissions import IsAdminOrReadOnly, IsSupport, IsAdmin, \
+    IsAdminOrGroupSupport, IsSuperAdmin
 from .serializers.agent import CreateAgentStartSerializer, AgentSerializer, \
-    GroupWithAgentsSerializer, AuthAgentSerializer
+    GroupWithAgentsSerializer, AuthAgentSerializer, FirstAuthAgentSerializer
 from ..utils.exceptions.commons import RequestValidationException
 from .renderers import JsonRenderer
 from api.models.support import Support
 
 
-class AuthAgentView(APIView):
+class LoginAgentView(APIView):
     """
     Авторизация агента
     """
@@ -29,14 +29,24 @@ class AuthAgentView(APIView):
     renderer_classes = (JsonRenderer,)
 
     @staticmethod
+    @transaction.atomic
     def post(request):
         serializer = AuthAgentSerializer(data=request.data)
+        data = {}
         if serializer.is_valid():
 
             token = auth_user(serializer.validated_data['login'], 
                                  serializer.validated_data['password'])
-            #TODO проверить первая ли авторизация агента, если да, уменьшить количестство агентов доступных для создания
-            return Response({'token': token})
+            agent = get_agent_by_user(get_user_by_token(token))
+            if is_first_auth(agent):
+                serializer = FirstAuthAgentSerializer(data=request.data)
+                if serializer.is_valid():
+                    data = set_agent_device(agent, serializer)
+                else:
+                    raise RequestValidationException(serializer)
+            data['token'] = token
+
+            return Response(data)
         else:
             raise RequestValidationException(serializer)
 
@@ -58,15 +68,22 @@ class AgentListView(APIView):
             group = get_group(group_id, request.user)
             self.check_object_permissions(self.request, group)
             user_data = create_agent_start(serializer, request_user)
+            #TODO можно ли создавать агентов, если нет стартового задания?
             return Response(user_data)
         else:
             raise RequestValidationException(serializer)
 
     def get(self, request):
         request_user = request.user
-        groups = get_all_groups_of_company(request_user)
-        serializer = GroupWithAgentsSerializer(groups, many=True)
-        return Response(serializer.data)
+        support = get_support_by_user(request_user)
+        if support.is_superadmin:
+            agents = get_all_agents()
+            serializer = AgentSerializer(agents, many=True)
+            return Response(serializer.data)
+        else:
+            groups = get_all_groups_of_company(request_user)
+            serializer = GroupWithAgentsSerializer(groups, many=True)
+            return Response(serializer.data)
 
 
 class AgentDetailView(APIView):
@@ -105,7 +122,7 @@ class AgentDetailView(APIView):
             raise RequestValidationException(serializer)
 
 
-class AgentProfileSerializer(APIView):
+class AgentProfileView(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     renderer_classes = (JsonRenderer,)
@@ -116,8 +133,13 @@ class AgentProfileSerializer(APIView):
         serializer = AgentSerializer(agent)
         return Response(serializer.data)
 
+
+class LogoutAgentView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    renderer_classes = (JsonRenderer,)
+
     @staticmethod
     def post(request):
         logout_user(request.user)
-        return Response()
-
+        return Response()    

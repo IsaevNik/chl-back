@@ -78,3 +78,7 @@ class CreateAgentStartSerializer(serializers.Serializer):
 class AuthAgentSerializer(serializers.Serializer):
     login = serializers.CharField()
     password = serializers.CharField()
+
+class FirstAuthAgentSerializer(AuthAgentSerializer):
+    platform = serializers.IntegerField()
+    device_id = serializers.CharField()

@@ -2,6 +2,7 @@
 import pickle
 import hashlib
 from datetime import datetime
+import json
 
 from django.contrib.auth.models import User
 from api.utils.exceptions.user import LoginAlredyExistException
@@ -11,7 +12,8 @@ from rest_framework.exceptions import NotFound
 from api.models.agent import Agent
 from api.models.user_group import UserGroup
 from api.models.support import Support
-from base_service import get_object
+from base_service import get_object, auth_user
+from ..service.task import get_start_task_by_company
 
 
 def create_agent_start(serializer, request_user):
@@ -62,3 +64,28 @@ def get_agent_by_user(user):
     except Agent.DoesNotExist:
         raise NotFound()
     return agent
+
+def get_all_agents():
+    return Agent.objects.all()
+
+def is_first_auth(agent):
+    if agent.platform:
+        return False
+    else:
+        return True
+
+def set_agent_device(agent, serializer):
+    agent.device_id = serializer.validated_data['device_id']
+    agent.platform = serializer.validated_data['platform']
+    agent.save()
+
+    company = agent.company
+    screens = json.loads(company.screen)
+    #TODO отправлять логотип при первом заходе или каждый раз?
+
+    start_task = get_start_task_by_company(company)
+    start_task_id = start_task.id
+    data = {'screen': screens,
+            'start_task_id': start_task_id}
+
+    return data

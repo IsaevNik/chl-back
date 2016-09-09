@@ -219,7 +219,7 @@ class TaskDetailView(APIView):
 
         if group:    
             self.check_object_permissions(self.request, group)
-
+        #TODO проверка, если задание вводное, то запретить удаление
         task.delete()
         return Response()
 

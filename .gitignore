@@ -7,3 +7,4 @@ tmp/*
 checklines/settings.py
 db.sqlite3
 api/test/*
+scripts/
