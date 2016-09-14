@@ -1,6 +1,6 @@
 from django.conf.urls import url, include
 
-from api.controllers.subscription import SubscriptionListView, SubscriptionDetailView, \
+from api.controllers.web.subscription import SubscriptionListView, SubscriptionDetailView, \
 	put_order_id
 
 urlpatterns = [

@@ -5,6 +5,7 @@ from django.db import transaction
 
 from api.models.agent import Agent
 from api.models.user_group import UserGroup
+from api.models.purse import Purse
 
 
 class AgentSerializer(serializers.ModelSerializer):
@@ -14,11 +15,12 @@ class AgentSerializer(serializers.ModelSerializer):
     '''
     login = serializers.CharField(source='user.username')
     company = serializers.CharField(source='company.name')
+    balance = serializers.IntegerField(source='purse.balance')
 
     class Meta:
         model = Agent
         fields = ('id', 'login', 'name', 'phone', 'company', 'group', \
-                  'platform', 'post', 'device_id')
+                  'platform', 'post', 'device_id', 'balance')
 
     def get_platform(self,obj):
         return obj.get_platform_display()
@@ -61,6 +63,9 @@ class CreateAgentStartSerializer(serializers.Serializer):
             group=user_group,
             company=company)
         agent.save()
+        purse = Purse()
+        purse.agent = agent
+        purse.save()
         return agent
 
     def update(self, agent, validated_data, group):

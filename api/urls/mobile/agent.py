@@ -1,7 +1,7 @@
 from django.conf.urls import url
 
 
-from api.controllers.agent import AgentProfileView, LogoutAgentView, LoginAgentView
+from api.controllers.mobile.agent import AgentProfileView, LogoutAgentView, LoginAgentView
 
 
 urlpatterns = [

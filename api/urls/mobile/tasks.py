@@ -1,7 +1,7 @@
 from django.conf.urls import url
 
 
-from api.controllers.task_address import WithoutAddressTaskView, WithAddressTaskView
+from api.controllers.mobile.task import WithoutAddressTaskView, WithAddressTaskView
 
 
 urlpatterns = [

@@ -1,30 +1,20 @@
 # coding=utf-8
-#import json
-
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-#from rest_framework.exceptions import PermissionDenied
-#from django.db import transaction
+from django.db import transaction
 
-from .serializers.task_address import TaskWithoutAddressSerializer, \
+from ..serializers.task_address import TaskWithoutAddressSerializer, \
     TaskWithAddressSerializer
-#from .serializers.task_address import TaskAddressCreateSerializer
-#from .serializers.point_blank import PoinBlankCreateSerializer
-#from api.forms import JsonReqForm
-from ..service.task import get_tasks_without_address, get_tasks_with_address
-#from ..service.user_group import get_group
-#from ..service.support import get_support_by_user, get_all_groups_of_support
-from ..service.task_address import is_task_available, get_task_address
-#from ..service.task_address import create_task_address, update_task_address, \
-#    delete_task_addresses
-#from ..service.point_blank import create_blank, update_blank, delete_blanks
-from .renderers import JsonRenderer
+from ...service.task import get_tasks_without_address, get_tasks_with_address, \
+    get_point_blanks_by_task
+from ...service.agent import get_agent_by_user
+from ...service.task_address import is_task_available, get_task_address, \
+    taken_task_by_agent
+from ..renderers import JsonRenderer
 from api.forms import TaskDistanceForm
-from ..utils.exceptions.commons import RequestValidationException
-#from ..utils.exceptions.task import WithoutGroupTaskCreateException, \
-#    StartTaskWithGroupException, StartTaskCreateException
+from ...utils.exceptions.commons import RequestValidationException
 from api.permissions import IsThisGroupMember
 
 
@@ -53,7 +43,7 @@ class WithAddressTaskView(APIView):
             serializer = TaskWithAddressSerializer(tasks, many=True)
             return Response(serializer.data)
         else:
-            raise RequestValidationException()
+            raise RequestValidationException(form)
 
 
 class TaskForAgentView(APIView):
@@ -70,6 +60,20 @@ class TaskForAgentView(APIView):
 
         serializer = TaskWithAddressSerializer(task_address)
         return Response(serializer.data)
+
+    @transaction.atomic
+    def post(self, request, id):
+        task_address = get_task_address(id)
+        agent = get_agent_by_user(request.user)
+        task = task_address.task
+        group = task.group
+        self.check_object_permissions(self.request, group)
+        is_task_available(task_address)
+
+        taken_task_by_agent(task_address ,agent)
+        return Response()
+
+
 
 '''class TaskListView(APIView):
 

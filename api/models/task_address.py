@@ -23,9 +23,9 @@ class TaskAddress(models.Model):
     def distance(self):
         return self._distance
 
-    def set_distance(self,longitude, latitude):
+    def set_distance(self, longitude, latitude):
         dist = math.hypot(longitude-self.longitude,
             latitude-self.latitude)
-        self._distance = dist
+        self._distance = round(dist,1)
     
     

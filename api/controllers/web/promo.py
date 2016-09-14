@@ -4,11 +4,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .serializers.promo import PromoCreateSerializer, PromoSerializer
+from ..serializers.promo import PromoCreateSerializer, PromoSerializer
 from api.service.promo import create_promo, get_all_promo_of_company
 from api.permissions import IsAdmin, IsAdminOrGroupSupportAndReadOnly, IsAdminOrReadOnly
-from .renderers import JsonRenderer
-from ..utils.exceptions.commons import RequestValidationException
+from ..renderers import JsonRenderer
+from ...utils.exceptions.commons import RequestValidationException
 
 
 class PromoListView(APIView):

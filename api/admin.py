@@ -3,6 +3,7 @@ from django.contrib import admin
 
 from .models.support import Support
 from .models.company import Company 
+from .models.purse import Purse 
 from .models.user_group import UserGroup 
 from .models.subscription_type import SubscriptionType
 from .models.agent import Agent
@@ -10,6 +11,8 @@ from .models.promo import Promo
 from .models.task import Task
 from .models.task_address import TaskAddress
 from .models.point_blank import PointBlank
+from .models.point_filled import PointFilled
+from .models.task_filled import TaskFilled
 from .models.subscription import Subscription
 
 
@@ -51,3 +54,6 @@ admin.site.register(Promo)
 admin.site.register(Task)
 admin.site.register(TaskAddress)
 admin.site.register(PointBlank)
+admin.site.register(Purse)
+admin.site.register(PointFilled)
+admin.site.register(TaskFilled)

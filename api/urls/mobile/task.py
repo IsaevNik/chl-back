@@ -1,7 +1,7 @@
 from django.conf.urls import url
 
 
-from api.controllers.task_address import TaskForAgentView
+from api.controllers.mobile.task import TaskForAgentView
 
 
 urlpatterns = [

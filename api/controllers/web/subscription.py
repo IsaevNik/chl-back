@@ -6,15 +6,15 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, renderer_classes, \
     permission_classes
 
-from .serializers.subscription import SubscriptionSerializer, \
+from ..serializers.subscription import SubscriptionSerializer, \
     CreateSubscriptionSerializer
-from ..service.subscription import create_subscription, get_all_subscriptions, \
+from ...service.subscription import create_subscription, get_all_subscriptions, \
     create_payonline_link, get_subscription_by_id, check_transaction
-from ..service.support import get_support_by_user
+from ...service.support import get_support_by_user
 from api.permissions import IsAdmin, IsAdminOrGroupSupport, IsAdminOrBooker
-from .renderers import JsonRenderer
-from ..utils.exceptions.commons import RequestValidationException
-from ..utils.exceptions.pay import OrderNotExistException
+from ..renderers import JsonRenderer
+from ...utils.exceptions.commons import RequestValidationException
+from ...utils.exceptions.pay import OrderNotExistException
 
 
 class SubscriptionListView(APIView):

@@ -5,19 +5,19 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db import transaction
 
-from ..service.support import create_support_start, create_support_finish, \
+from ...service.support import create_support_start, create_support_finish, \
      update_support, get_all_supports_of_company, get_support, \
      delete_support, get_support_by_user
-from ..service.base_service import logout_user, auth_user
+from ...service.base_service import logout_user, auth_user
 from api.permissions import IsAdminOrReadOnly, IsSupport, IsAdmin, IsAdminOrSuperAdmin
-from .serializers.support import SupportSerializer, CreateSupportStartSerializer, \
+from ..serializers.support import SupportSerializer, CreateSupportStartSerializer, \
     CreateSupportFinishSerializer, AuthSupportSerializer
-from ..utils.exceptions.commons import RequestValidationException
-from .renderers import JsonRenderer
+from ...utils.exceptions.commons import RequestValidationException
+from ..renderers import JsonRenderer
 from api.models.support import Support
 
 
-class AuthSupportView(APIView):
+class LoginSupportView(APIView):
     """
     Авторизация
     """

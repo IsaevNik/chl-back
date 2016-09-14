@@ -1,7 +1,7 @@
 from django.conf.urls import url
 
 
-from api.controllers.agent import AgentListView, AgentDetailView
+from api.controllers.web.agent import AgentListView, AgentDetailView
 
 
 urlpatterns = [

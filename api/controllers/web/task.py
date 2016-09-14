@@ -8,21 +8,21 @@ from rest_framework.views import APIView
 from rest_framework.exceptions import PermissionDenied
 from django.db import transaction
 
-from .serializers.task import TaskCreateSerializer, GroupWithTaskSerializer, \
+from ..serializers.task import TaskCreateSerializer, GroupWithTaskSerializer, \
     TaskSerializer
-from .serializers.task_address import TaskAddressCreateSerializer
-from .serializers.point_blank import PoinBlankCreateSerializer
+from ..serializers.task_address import TaskAddressCreateSerializer
+from ..serializers.point_blank import PoinBlankCreateSerializer
 from api.forms import JsonReqForm
-from ..service.task import get_data_for_task, create_task, get_task, \
+from ...service.task import get_data_for_task, create_task, get_task, \
     update_task, get_start_task_by_company
-from ..service.user_group import get_group
-from ..service.support import get_support_by_user, get_all_groups_of_support
-from ..service.task_address import create_task_address, update_task_address, \
+from ...service.user_group import get_group
+from ...service.support import get_support_by_user, get_all_groups_of_support
+from ...service.task_address import create_task_address, update_task_address, \
     delete_task_addresses
-from ..service.point_blank import create_blank, update_blank, delete_blanks
-from .renderers import JsonRenderer
-from ..utils.exceptions.commons import RequestValidationException
-from ..utils.exceptions.task import WithoutGroupTaskCreateException, \
+from ...service.point_blank import create_blank, update_blank, delete_blanks
+from ..renderers import JsonRenderer
+from ...utils.exceptions.commons import RequestValidationException
+from ...utils.exceptions.task import WithoutGroupTaskCreateException, \
     StartTaskWithGroupException, StartTaskCreateException
 from api.permissions import IsAdminOrGroupSupport, IsSupport
 
@@ -92,12 +92,12 @@ class TaskListView(APIView):
 
         return Response()
 
-
     def get(self, request):
         support = get_support_by_user(request.user)
         groups = get_all_groups_of_support(support)
         serializer = GroupWithTaskSerializer(groups, many=True)
         return Response(serializer.data)
+
 
 class StartTaskView(APIView):
     authentication_classes = (TokenAuthentication,)

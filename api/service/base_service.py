@@ -10,6 +10,7 @@ from rest_framework.authtoken.models import Token
 from django.conf import settings
 
 from api.models.support import Support
+from api.models.agent import Agent
 from ..utils.exceptions.task import InvalidTypeOfImgException
 from ..utils.exceptions.auth import InvalidCredentialsException
 
@@ -33,6 +34,15 @@ def logout_user(user):
     token.delete()
 
 
+def is_support(user):
+    try:
+        support = Support.get_support_by_user(user)
+    except Support.DoesNotExist:
+        return False
+    return True
+
+
+
 def auth_user(login, password):
     try:
         user = User.objects.get(username=login)
@@ -49,8 +59,22 @@ def auth_user(login, password):
     raise InvalidCredentialsException()
 
 
+def get_company_by_user(user):
+    try:
+        support = Support.objects.get(user=user)
+        company = support.company
+        return company
+    except Support.DoesNotExist:
+        try:
+            agent = Agent.objects.get(user=user)
+            company = agent.company
+            return company
+        except Agent.DoesNotExist:
+            raise NotFound()
+            
+
 def save_image(img_file, user):
-    company = Support.get_company_by_user(user)
+    company = get_company_by_user(user)
     company_id = company.id
 
     if imghdr.what(img_file) == 'png':

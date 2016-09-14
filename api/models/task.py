@@ -29,3 +29,7 @@ class Task(models.Model):
     @property
     def task_adresses_count(self):
         return len(self.task_addresses.all())
+
+    @property
+    def blanks_count(self):
+        return len(self.blanks.all())

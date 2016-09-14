@@ -2,11 +2,11 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .serializers.subscription_type import SubscriptionTypeSerializer
-from ..service.subscription_type import get_all_subscriptions
+from ..serializers.subscription_type import SubscriptionTypeSerializer
+from ...service.subscription_type import get_all_subscriptions
 from api.permissions import IsAdmin, IsAdminOrGroupSupport
-from .renderers import JsonRenderer
-from ..utils.exceptions.commons import RequestValidationException
+from ..renderers import JsonRenderer
+from ...utils.exceptions.commons import RequestValidationException
 
 class SubscriptionTypeListView(APIView):
 

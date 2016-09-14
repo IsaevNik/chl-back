@@ -29,3 +29,9 @@ class InvalidTypeOfImgException(AbstractException):
 
 class TaskTimeException(AbstractException):
 	pass
+
+class TaskAmountException(AbstractException):
+	pass
+
+class TaskAlreadyInWorkException(AbstractException):
+    pass

@@ -10,8 +10,7 @@ class Company(models.Model):
     contact_person_phone = models.CharField(max_length=10, unique=True)
     address = models.CharField(max_length=255)
     logo_img = models.CharField(max_length=100, default='img/default_logo.png')
-    #TODO rename screens
-    screen = models.TextField(blank=True)
+    screens = models.TextField(blank=True)
     invite_text = models.TextField(blank=True)
     checking_acc =  models.CharField(blank=True, max_length=12)
     bank_name = models.CharField(blank=True, max_length=255)

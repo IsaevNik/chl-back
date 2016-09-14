@@ -22,8 +22,7 @@ class PointBlankSerializer(serializers.ModelSerializer):
 
     def get_content(self, obj):
         if obj.type == 2:
-            data = []
-            data.append(json.loads(obj.content))
+            data = json.loads(obj.content)
             return data
         else:
             return obj.content

@@ -19,7 +19,7 @@ from ..utils.exceptions.commons import RequestValidationException
 def uploadImg(request):
     form = UploadFileForm(request.POST, request.FILES)
     if form.is_valid():
-        img_url = save_image(request.FILES['file'], request.user)
+        img_url = save_image(request.FILES['content'], request.user)
     else:
         raise RequestValidationException(form)
 

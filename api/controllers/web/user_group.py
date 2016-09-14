@@ -4,12 +4,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .serializers.user_group import UserGroupSerializer, UserGroupCreateSerializer
-from ..service.user_group import create_group, get_all_groups_of_company, update_group, \
+from ..serializers.user_group import UserGroupSerializer, UserGroupCreateSerializer
+from ...service.user_group import create_group, get_all_groups_of_company, update_group, \
     delete_group, get_group
 from api.permissions import IsAdmin, IsAdminOrGroupSupportAndReadOnly, IsAdminOrReadOnly
-from .renderers import JsonRenderer
-from ..utils.exceptions.commons import RequestValidationException
+from ..renderers import JsonRenderer
+from ...utils.exceptions.commons import RequestValidationException
 
 class UserGroupListView(APIView):
 

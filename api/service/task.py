@@ -3,6 +3,7 @@ from django.db import transaction, connection
 
 from api.models.task import Task
 from api.models.task_address import TaskAddress
+from api.models.task_filled import TaskFilled
 from api.models.point_blank import PointBlank
 from api.utils.exceptions.task import TaskLimitException
 from base_service import get_object
@@ -70,16 +71,17 @@ def get_tasks_without_address(user):
     group = agent.group
     tasks = []
     with connection.cursor() as cursor:
-        # datetime("NOW", "localtime") -> NOW()
+        #TODO datetime("NOW", "localtime") -> NOW() task.is_start=0 -> task.is_start=False
         sql = \
             'SELECT task.id, address.id FROM api_task AS task, api_taskaddress as address WHERE '\
             'task.group_id={0} AND address.task_id=task.id AND address.amount>0 AND task.start_dt<datetime("NOW", "localtime") ' \
-            'AND task.finish_dt>datetime("NOW", "localtime") AND address.longitude IS NULL ORDER BY task.id;'
+            'AND task.finish_dt>datetime("NOW", "localtime") AND task.is_start=0 AND address.longitude IS NULL ORDER BY task.id;'
         cursor.execute(sql.format(group.id))
         for raw in cursor.fetchall():
             address_id = raw[1]
-            #TODO добавить проверку, есть ли во взятых это задание
-            tasks.append(TaskAddress.objects.get(id=address_id))
+            task_address = TaskAddress.objects.get(id=address_id)
+            if not TaskFilled.objects.filter(task_address=task_address, executer=agent).exists():
+                tasks.append(task_address)
         return tasks
 
 def get_tasks_with_address(data, user):
@@ -102,13 +104,17 @@ def get_tasks_with_address(data, user):
             'SELECT task.id, address.id '\
             'FROM api_task AS task, api_taskaddress as address WHERE task.group_id={0} AND address.task_id=task.id '\
             'AND address.amount>0 AND task.start_dt<datetime("NOW", "localtime") AND ' \
-            'task.finish_dt>datetime("NOW", "localtime") AND address.longitude IS NOT NULL;'
+            'task.finish_dt>datetime("NOW", "localtime") AND task.is_start=0 AND address.longitude IS NOT NULL;'
         cursor.execute(sql.format(group.id))
         for raw in cursor.fetchall():
             address_id = raw[1]
-            #TODO добавить проверку, есть ли во взятых это задание
-            task = TaskAddress.objects.get(id=address_id)
-            task.set_distance(longitude, latitude)
-            tasks.append(task)
+            task_address = TaskAddress.objects.get(id=address_id)
+            if not TaskFilled.objects.filter(task_address=task_address, executer=agent).exists():
+                task_address.set_distance(longitude, latitude)
+                tasks.append(task_address)
         return tasks
 
+
+def get_point_blanks_by_task(task):
+    point_blanks = PointBlank.objects.filter(task=task)
+    return point_blanks

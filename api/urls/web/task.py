@@ -1,6 +1,6 @@
 from django.conf.urls import url, include
 
-from api.controllers.task import TaskListView, TaskDetailView, \
+from api.controllers.web.task import TaskListView, TaskDetailView, \
     StartTaskView
 
 urlpatterns = [

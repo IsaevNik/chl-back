@@ -1,7 +1,7 @@
 from django.conf.urls import url
 
 
-from api.controllers.company import CompanyView, RegCompanyStartView, \
+from api.controllers.web.company import CompanyView, RegCompanyStartView, \
     RegCompanyFinishView, CompanyStatisticView
 
 urlpatterns = [

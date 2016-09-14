@@ -81,3 +81,25 @@ class IsThisGroupMember(permissions.BasePermission):
             return True
         else:
             return False
+
+
+class IsThisTaskExecuter(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        agent = Agent.get_agent_by_user(request.user)
+        if obj.executer == agent:
+            return True
+        else:
+            return False
+
+class IsAdminOrAgentOfYourGroup(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        try:
+            support = Support.get_support_by_user(request.user)
+        except Support.DoesNotExist:
+            return False
+
+        group = obj.group
+        if group.support == support or support.is_admin:
+            return True
+        else:
+            return False

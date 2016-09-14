@@ -10,6 +10,7 @@ from api.utils.exceptions.company import AgentLimitException
 from rest_framework.exceptions import NotFound
 
 from api.models.agent import Agent
+from api.models.purse import Purse
 from api.models.user_group import UserGroup
 from api.models.support import Support
 from base_service import get_object, auth_user
@@ -29,6 +30,8 @@ def create_agent_start(serializer, request_user):
         raise NotFound
 
     agent = serializer.create(serializer.validated_data, company, user_group)
+
+    #TODO отправка смс сообщения с приглашением
     user_data = {'login': agent.user.username, 
                  'password': serializer.validated_data['password']}
     return user_data
@@ -79,11 +82,11 @@ def set_agent_device(agent, serializer, start_task):
     agent.save()
 
     company = agent.company
-    screens = json.loads(company.screen)
+    screens = json.loads(company.screens)
     #TODO отправлять логотип при первом заходе или каждый раз?
 
     start_task_id = start_task.id
-    data = {'screen': screens,
+    data = {'screens': screens,
             'start_task_id': start_task_id}
 
     return data

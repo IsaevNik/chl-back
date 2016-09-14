@@ -28,4 +28,11 @@ errors = {
     'DoesNotSelectImageException': u"Изображение не выбрано",
     'InvalidTypeOfImgException': u"Недопустимый тип файла, допустимый: *.png",
     'TaskTimeException': u"Вы не можете просматривать просроченные задания",
+    'TaskAmountException': u"Данных заданий больше не осталось",
+    'TaskAlreadyInWorkException': u"Вы уже выполняете это задание",
+    'TaskNotDoneException': u"Агент ещё не приступил к выполнению этого задания",
+    'TaskMustNotBeCheckingException': u"Задание ещё не выполнено, либо уже проверено",
+    'TaskStatusException': u"Недопустимый статус для задания",
+    'CancelTaskException': u"Задание недоступно для удаления",
+    'DoTaskException': u"Задание недоступно для выполнения"
 }
