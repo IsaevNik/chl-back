@@ -215,7 +215,7 @@ class TaskDetailView(APIView):
         group = task.group
 
         if not group and not support.is_admin:
-            raise PermissionDenied
+            raise PermissionDenied()
 
         if group:    
             self.check_object_permissions(self.request, group)

@@ -14,6 +14,7 @@ from .models.point_blank import PointBlank
 from .models.point_filled import PointFilled
 from .models.task_filled import TaskFilled
 from .models.subscription import Subscription
+from .models.pay import Pay
 
 
 class SubscriptionAdmin(admin.ModelAdmin):
@@ -57,3 +58,4 @@ admin.site.register(PointBlank)
 admin.site.register(Purse)
 admin.site.register(PointFilled)
 admin.site.register(TaskFilled)
+admin.site.register(Pay)

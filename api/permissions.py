@@ -30,7 +30,10 @@ class IsAdminOrBooker(permissions.BasePermission):
 
 class IsAdminOrGroupSupportAndReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        support = Support.get_support_by_user(request.user)
+        try:
+            support = Support.get_support_by_user(request.user)
+        except Support.DoesNotExist:
+            return False
         if (request.method in permissions.SAFE_METHODS and 
             obj.support == support) or support.is_admin:
             return True
@@ -41,7 +44,8 @@ class IsAdminOrGroupSupportAndReadOnly(permissions.BasePermission):
 class IsAdminOrGroupSupport(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         support = Support.get_support_by_user(request.user)
-        if obj.support == support or support.is_admin:
+        if (obj.support == support or 
+            support.company == obj.support.company and support.is_admin):
             return True
         else:
             return False
@@ -100,6 +104,24 @@ class IsAdminOrAgentOfYourGroup(permissions.BasePermission):
 
         group = obj.group
         if group.support == support or support.is_admin:
+            return True
+        else:
+            return False
+
+
+class IsAgent(permissions.BasePermission):
+    def has_permission(self, request, view):
+        try:
+            agent = Agent.get_agent_by_user(request.user)
+        except Agent.DoesNotExist:
+            return False
+        return True
+
+
+class IsThisPayAgent(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        agent = Agent.get_agent_by_user(request.user)
+        if obj.agent == agent:
             return True
         else:
             return False

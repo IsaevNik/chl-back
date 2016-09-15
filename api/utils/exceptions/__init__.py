@@ -34,5 +34,8 @@ errors = {
     'TaskMustNotBeCheckingException': u"Задание ещё не выполнено, либо уже проверено",
     'TaskStatusException': u"Недопустимый статус для задания",
     'CancelTaskException': u"Задание недоступно для удаления",
-    'DoTaskException': u"Задание недоступно для выполнения"
+    'DoTaskException': u"Задание недоступно для выполнения",
+    'LowBalanceException': u"Не достаточно баллов для данного поощрения",
+    'PayStatusException': u"Недопустимый статус для поощрения",
+    'PayAlreadyCheckException': u"Данный запрос на выплату уже рассотрен"
 }

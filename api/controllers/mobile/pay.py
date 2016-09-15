@@ -5,20 +5,45 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db import transaction
 
-from ..serializers.task_address import TaskWithoutAddressSerializer, \
-    TaskWithAddressSerializer
-from ...service.task import get_tasks_without_address, get_tasks_with_address, \
-    get_point_blanks_by_task
-from ...service.agent import get_agent_by_user
-from ...service.task_address import is_task_available, get_task_address, \
-    taken_task_by_agent
 from ..renderers import JsonRenderer
-from api.forms import TaskDistanceForm
-from ...utils.exceptions.commons import RequestValidationException
-from api.permissions import IsThisGroupMember
+from ...service.agent import get_agent_by_user
+from ...service.pay import create_pay, get_pays_by_agent, get_pay_by_id
+from api.permissions import IsAgent, IsThisPayAgent
+from ..serializers.pay import PayListMobileSerializer, PayDetailMobileSerializer
 
 
-class WithoutAddressTaskView(APIView):
+class PayListView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsAgent)
+    renderer_classes = (JsonRenderer,)
+    
+
+    def post(self, request):
+        agent = get_agent_by_user(request.user)
+        create_pay(agent)
+        return Response()
+
+    def get(self, request):
+        agent = get_agent_by_user(request.user)
+        pays = get_pays_by_agent(agent)
+        serializer = PayListMobileSerializer(pays, many=True)
+        return Response(serializer.data)
+
+
+class PayDetailView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, IsAgent, IsThisPayAgent)
+    renderer_classes = (JsonRenderer,)
+
+    def get(self, request, id):
+        pay = get_pay_by_id(id)
+        self.check_object_permissions(self.request, pay)
+
+        serializer = PayDetailMobileSerializer(pay)
+        return Response(serializer.data)
+
+
+'''class WithoutAddressTaskView(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     renderer_classes = (JsonRenderer,)
@@ -71,7 +96,7 @@ class TaskForAgentView(APIView):
         is_task_available(task_address)
 
         taken_task_by_agent(task_address ,agent)
-        return Response()
+        return Response()'''
 
 
 

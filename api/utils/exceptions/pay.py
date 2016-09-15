@@ -5,3 +5,15 @@ from . import errors
 
 class OrderNotExistException(AbstractException):
     pass
+
+
+class LowBalanceException(AbstractException):
+	pass
+
+
+class PayStatusException(AbstractException):
+	pass
+
+
+class PayAlreadyCheckException(AbstractException):
+	pass

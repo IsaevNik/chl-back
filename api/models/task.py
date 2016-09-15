@@ -20,7 +20,6 @@ class Task(models.Model):
     release_dt = models.DateTimeField(blank=True, null=True)
     create_dt = models.DateTimeField(auto_now_add=True)
     last_edit_dt = models.DateTimeField(auto_now=True)
-    execute_t = models.IntegerField(default=14400)
     is_start = models.BooleanField(default=False)
 
     def __unicode__(self):

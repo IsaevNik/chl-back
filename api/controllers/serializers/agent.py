@@ -15,7 +15,8 @@ class AgentSerializer(serializers.ModelSerializer):
     '''
     login = serializers.CharField(source='user.username')
     company = serializers.CharField(source='company.name')
-    balance = serializers.IntegerField(source='purse.balance')
+    balance = serializers.SerializerMethodField()
+    platform = serializers.SerializerMethodField()
 
     class Meta:
         model = Agent
@@ -24,6 +25,10 @@ class AgentSerializer(serializers.ModelSerializer):
 
     def get_platform(self,obj):
         return obj.get_platform_display()
+
+    def get_balance(self, obj):
+        return obj.purse.get_balance()
+
 
 class GroupWithAgentsSerializer(serializers.ModelSerializer):
     '''

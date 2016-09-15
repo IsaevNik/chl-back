@@ -122,7 +122,7 @@ def get_support(id, user):
 def get_support_by_user(user):
     try:
         support = Support.get_support_by_user(user)
-    except Agent.DoesNotExist:
+    except Support.DoesNotExist:
         raise NotFound()
     return support
 

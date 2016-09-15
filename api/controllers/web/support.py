@@ -137,8 +137,13 @@ class SupportProfileView(APIView):
         serializer = SupportSerializer(support)
         return Response(serializer.data)
 
+
+class LogoutSupportView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    renderer_classes = (JsonRenderer,)
+
     @staticmethod
     def post(request):
         logout_user(request.user)
-        return Response()
-
+        return Response()  

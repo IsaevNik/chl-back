@@ -8,6 +8,7 @@ import agent
 import service
 import inwork
 import support
+import pays
 from api.controllers.web.user_group import UserGroupListView, UserGroupDetailView
 from api.controllers.web.subscription_type import SubscriptionTypeListView
 from api.controllers.web.promo import PromoListView
@@ -28,5 +29,6 @@ urlpatterns = [
     url(r'^tasks/', include(task)),
     url(r'^subscriptions/', include(subscription)),
     url(r'^service/', include(service)),
-    url(r'^inwork/', include(inwork))
+    url(r'^inwork/', include(inwork)),
+    url(r'^pays/', include(pays)),
 ]
