@@ -54,7 +54,7 @@ class Company(models.Model):
 
         return agent_limit - now_agents_sum
 
-    #сколько времени осталось до окончания подписки
+    #когда заканчивается активная подписка
     @property
     def time_to_finish_subscription(self):
         active_subscription = self._get_active_subscription()

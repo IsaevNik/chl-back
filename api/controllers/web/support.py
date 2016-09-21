@@ -6,10 +6,11 @@ from rest_framework.views import APIView
 from django.db import transaction
 
 from ...service.support import create_support_start, create_support_finish, \
-     update_support, get_all_supports_of_company, get_support, \
+     update_support, get_all_supports_of_company, get_support_by_id, \
      delete_support, get_support_by_user
 from ...service.base_service import logout_user, auth_user
-from api.permissions import IsAdminOrReadOnly, IsSupport, IsAdmin, IsAdminOrSuperAdmin
+from api.permissions import IsAdmin, IsAdminOrSuperAdmin, \
+    IsCompanyActive, IsSupportInstance
 from ..serializers.support import SupportSerializer, CreateSupportStartSerializer, \
     CreateSupportFinishSerializer, AuthSupportSerializer
 from ...utils.exceptions.commons import RequestValidationException
@@ -19,14 +20,13 @@ from api.models.support import Support
 
 class LoginSupportView(APIView):
     """
-    Авторизация
+    Авторизация оператора
     """
     authentication_classes = ()
     permission_classes = ()
     renderer_classes = (JsonRenderer,)
 
-    @staticmethod
-    def post(request):
+    def post(self, request):
         serializer = AuthSupportSerializer(data=request.data)
         if serializer.is_valid():
             token = auth_user(serializer.validated_data['email'], 
@@ -41,16 +41,13 @@ class CreateSupportStartView(APIView):
     Первый этап создания объекта Support
     """
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsAdmin)
+    permission_classes = (IsAuthenticated, IsAdmin, IsCompanyActive)
     renderer_classes = (JsonRenderer,)
 
-    @staticmethod
-
-    def post(request):
+    def post(self, request):
         serializer = CreateSupportStartSerializer(data=request.data)
-        request_user = request.user
         if serializer.is_valid():
-            token = create_support_start(serializer, request_user)
+            token = create_support_start(serializer, request.user)
             return Response({'token': token})
         else:
             raise RequestValidationException(serializer)
@@ -64,13 +61,12 @@ class CreateSupportFinishView(APIView):
     permission_classes = ()
     renderer_classes = (JsonRenderer,)
 
-    @staticmethod
     @transaction.atomic
-    def post(request):
+    def post(self, request):
         serializer = CreateSupportFinishSerializer(data=request.data)
         if serializer.is_valid():
-            create_support_finish(serializer)
-            return Response()
+            token = create_support_finish(serializer)
+            return Response({'token': token})
         else:
             raise RequestValidationException(serializer)
 
@@ -95,25 +91,22 @@ class SupportDetailView(APIView):
     Представление объекта Support
     '''
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsAdmin)
+    permission_classes = (IsAuthenticated, IsAdmin, IsCompanyActive)
     renderer_classes = (JsonRenderer,)
 
-    @staticmethod
-    def get(request, id):
-        support = get_support(id, request.user)
+    def get(self, request, id):
+        support = get_support_by_id(id, request.user)
         serializer = SupportSerializer(support)
         return Response(serializer.data)
 
-    @staticmethod
-    def delete(request, id):
-        support = get_support(id, request.user)
+    def delete(self, request, id):
+        support = get_support_by_id(id, request.user)
         delete_support(support)
         return Response()
 
-    @staticmethod
     @transaction.atomic
-    def put(request, id):
-        support = get_support(id, request.user)
+    def put(self, request, id):
+        support = get_support_by_id(id, request.user)
         serializer = CreateSupportStartSerializer(data=request.data)
         if serializer.is_valid():
             update_support(support, serializer)
@@ -128,11 +121,10 @@ class SupportProfileView(APIView):
     Работа оператора со своим профилем
     '''
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsSupportInstance)
     renderer_classes = (JsonRenderer,)
 
-    @staticmethod
-    def get(request):
+    def get(self, request):
         support = get_support_by_user(request.user)
         serializer = SupportSerializer(support)
         return Response(serializer.data)
@@ -140,10 +132,9 @@ class SupportProfileView(APIView):
 
 class LogoutSupportView(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsSupportInstance)
     renderer_classes = (JsonRenderer,)
 
-    @staticmethod
-    def post(request):
+    def post(self, request):
         logout_user(request.user)
         return Response()  

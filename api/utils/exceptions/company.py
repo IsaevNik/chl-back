@@ -8,3 +8,6 @@ class SupportLimitException(AbstractException):
 
 class AgentLimitException(AbstractException):
     pass
+
+class SubcriptionTimeOutException(AbstractException):
+	pass

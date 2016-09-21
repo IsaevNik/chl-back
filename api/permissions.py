@@ -1,7 +1,9 @@
 from rest_framework import permissions
+from django.utils import timezone
 
 from api.models.support import Support
 from api.models.agent import Agent
+from api.utils.exceptions.company import SubcriptionTimeOutException
 
 
 class IsAdminOrReadOnly(permissions.BasePermission):
@@ -11,10 +13,27 @@ class IsAdminOrReadOnly(permissions.BasePermission):
         return Support.get_support_by_user(request.user).is_admin
 
 
-
+# checked
 class IsAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
-        return Support.get_support_by_user(request.user).is_admin
+        try:
+            support = Support.get_support_by_user(request.user)
+            return support.is_admin
+        except Support.DoesNotExist:
+            return False
+
+#checked
+class IsCompanyActive(permissions.BasePermission):
+    def has_permission(self, request, view):
+        try:
+            support = Support.get_support_by_user(request.user)
+            if support.company.time_to_finish_subscription < timezone.now():
+                raise SubcriptionTimeOutException()
+            else:
+                return True
+        except Support.DoesNotExist:
+            return False
+
 
 
 class IsAdminOrBooker(permissions.BasePermission):
@@ -56,13 +75,23 @@ class IsSuperAdmin(permissions.BasePermission):
         return Support.get_support_by_user(request.user).is_superadmin
 
 
+#checked
 class IsAdminOrSuperAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
-        if (Support.get_support_by_user(request.user).is_admin or 
-            Support.get_support_by_user(request.user).is_superadmin):
-            return True
-        else:
+        try:
+            support = Support.get_support_by_user(request.user)
+            return (support.is_admin or support.is_superadmin)
+        except Support.DoesNotExist:
             return False
+
+#checked
+class IsSupportInstance(permissions.BasePermission):
+    def has_permission(self, request, view):
+        try:
+            support = Support.get_support_by_user(request.user)
+        except Support.DoesNotExist:
+            return False
+        return True
 
 
 class IsSupport(permissions.BasePermission):

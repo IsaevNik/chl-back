@@ -44,7 +44,7 @@ class CreateSupportStartSerializer(serializers.Serializer):
         support = Support(
             user=user,
             role=validated_data['role'],
-            post=validated_data['post'],
+            post=validated_data.get('post', ''),
             company=company)
         return support
 
@@ -60,7 +60,7 @@ class CreateSupportStartSerializer(serializers.Serializer):
         #if support.is_admin and validated_data['role'] == 2:
         #    raise ChangeAdminToSupportException
         support.role = validated_data['role']
-        support.post = validated_data['post']
+        support.post = validated_data.get('post', '')
         support.save()
 
 
@@ -77,11 +77,5 @@ class AuthSupportSerializer(serializers.Serializer):
     """
     Сериализатор для авторизации Оператора
     """
-    def create(self, validated_data):
-        raise RuntimeError("Wrong usage %s" % self.__class__.__name__)
-
-    def update(self, instance, validated_data):
-        raise RuntimeError("Wrong usage %s" % self.__class__.__name__)
-
-    email = serializers.CharField(max_length=100, required=True)
-    password = serializers.CharField(max_length=100)
+    email = serializers.CharField()
+    password = serializers.CharField()

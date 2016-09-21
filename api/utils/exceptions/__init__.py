@@ -25,6 +25,7 @@ errors = {
     'OrderNotExistException': u"Ошибка регистрации платежа",
     'SupportLimitException': u"Достигнут лимит количества операторов, предусмотренный вашим тарифом",
     'AgentLimitException': u"Достигнут лимит количества агентов, предусмотренный вашим тарифом",
+    'SubcriptionTimeOutException': u"Ваша подписка закончилась",
     'DoesNotSelectImageException': u"Изображение не выбрано",
     'InvalidTypeOfImgException': u"Недопустимый тип файла, допустимый: *.png",
     'TaskTimeException': u"Вы не можете просматривать просроченные задания",

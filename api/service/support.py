@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import transaction
 from rest_framework.exceptions import NotFound
+from rest_framework.authtoken.models import Token
 
 from api.utils.exceptions.user import UsernameAlreadyExistException, \
     EmailAlreadyExistException, FamilyAlreadyExistException
@@ -30,20 +31,21 @@ def create_support_start(serializer, request_user):
     '''
 
     if User.objects.filter(username=serializer.validated_data['email']).exists():
-        raise EmailAlreadyExistException
+        raise EmailAlreadyExistException()
     
-    company = (Support.get_support_by_user(request_user)).company
+    company = get_support_by_user(request_user).company
     if company.supports_left < 1:
-        raise SupportLimitException
+        raise SupportLimitException()
 
     if serializer.validated_data['role'] in [1,3,4]:
-        raise SupportRoleException
+        raise SupportRoleException()
 
-    
     support = serializer.create(serializer.validated_data, company)
 
     token = hashlib.sha256(support.user.email + str(datetime.now())).hexdigest()
     cache.set(token, pickle.dumps(support), 60*60*24)
+
+    #TODO отправка письма с приглашением (ссылка с токеном, логин, пароль) на почту созданного Support 
 
     return token
 
@@ -57,11 +59,10 @@ def create_support_finish(serializer, is_admin=False):
     password = serializer.validated_data['password']
     email = serializer.validated_data['email']
 
-    support_ser = cache.get(token)
     support = pickle.loads(cache.get(token))
 
     if support.user.email != email:
-        raise InvalidEmailException
+        raise InvalidEmailException()
 
     cache.delete(token)
 
@@ -86,6 +87,8 @@ def create_support_finish(serializer, is_admin=False):
     support.user = user
     support.save()
 
+    return Token.objects.create(user=user).key
+
 
 def update_support(support, serializer):
     old_email = support.user.email
@@ -103,7 +106,7 @@ def delete_support(support):
 
 
 def get_all_supports_of_company(user):
-    support = Support.get_support_by_user(user)
+    support = get_support_by_user(user)
     if support.is_superadmin:
         return Support.objects.all()
     else:
@@ -111,7 +114,7 @@ def get_all_supports_of_company(user):
         return Support.objects.filter(company=company)
 
 
-def get_support(id, user):
+def get_support_by_id(id, user):
     company = Support.get_company_by_user(user)
     support = get_object(Support, id)
     if support.company != company:

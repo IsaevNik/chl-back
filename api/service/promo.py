@@ -3,7 +3,7 @@ from rest_framework.exceptions import NotFound
 
 from api.models.support import Support
 from api.models.promo import Promo
-from support import get_support, get_support_by_user
+from support import get_support_by_user
 from base_service import get_object
 
 

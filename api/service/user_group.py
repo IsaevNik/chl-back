@@ -3,13 +3,13 @@ from rest_framework.exceptions import NotFound
 
 from api.models.support import Support
 from api.models.user_group import UserGroup
-from support import get_support
+from support import get_support_by_id
 from base_service import get_object
 from promo import get_promo
 
 
 def create_group(serializer, user):
-	support = get_support(serializer.validated_data['support_id'], user)
+	support = get_support_by_id(serializer.validated_data['support_id'], user)
 	promo = get_promo(serializer.validated_data['promo_id'])
 	UserGroup.objects.create(name=serializer.validated_data['name'],
 							 support=support,
