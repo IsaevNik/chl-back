@@ -15,7 +15,7 @@ from ..serializers.point_blank import PoinBlankCreateSerializer
 from api.forms import JsonReqForm
 from ...service.task import get_data_for_task, create_task, get_task, \
     update_task, get_start_task_by_company
-from ...service.user_group import get_group
+from ...service.user_group import get_group_by_id
 from ...service.support import get_support_by_user, get_all_groups_of_support
 from ...service.task_address import create_task_address, update_task_address, \
     delete_task_addresses
@@ -62,7 +62,7 @@ class TaskListView(APIView):
 
         #Если указан идентификатор группы, проверить наличие прав на эту группу
         if data_for_task['group_id']:
-            group = get_group(data_for_task['group_id'], request.user)
+            group = get_group_by_id(data_for_task['group_id'], request.user)
             self.check_object_permissions(self.request, group)
         else:
             group = None
@@ -180,7 +180,7 @@ class TaskDetailView(APIView):
             else:
                 raise RequestValidationException(b_serializer)
         #проверка прав на новую группу    
-        new_group = get_group(task_serializer.validated_data['group_id'], request.user)
+        new_group = get_group_by_id(task_serializer.validated_data['group_id'], request.user)
         if new_group:
             self.check_object_permissions(self.request, new_group)
         else:

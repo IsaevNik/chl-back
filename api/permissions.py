@@ -10,7 +10,7 @@ class IsAdminOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
         try:
             support = Support.get_support_by_user(request.user)
-            if request.method in permissions.SAFE_METHODS:
+            if support.is_operator and (request.method in permissions.SAFE_METHODS):
                 return True
             return support.is_admin
         except Support.DoesNotExist:
@@ -63,7 +63,7 @@ class IsAdminOrBooker(permissions.BasePermission):
             return False
 
 #checked
-class IsThisCompanyMember(permissions.BasePermission):
+class IsThisCompanyObject(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         try:
             support = Support.get_support_by_user(request.user)
@@ -76,14 +76,12 @@ class IsThisCompanyMember(permissions.BasePermission):
 
 class IsAdminOrGroupSupportAndReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
+        company = obj.support.company
         try:
             support = Support.get_support_by_user(request.user)
+            return (request.method in permissions.SAFE_METHODS and obj.support == support) or \
+                (support.is_admin and support.company == company)
         except Support.DoesNotExist:
-            return False
-        if (request.method in permissions.SAFE_METHODS and 
-            obj.support == support) or support.is_admin:
-            return True
-        else:
             return False
 
 

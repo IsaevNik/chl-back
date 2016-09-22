@@ -40,5 +40,8 @@ errors = {
     'DoTaskException': u"Задание недоступно для выполнения",
     'LowBalanceException': u"Не достаточно баллов для данного поощрения",
     'PayStatusException': u"Недопустимый статус для поощрения",
-    'PayAlreadyCheckException': u"Данный запрос на выплату уже рассотрен"
+    'PayAlreadyCheckException': u"Данный запрос на выплату уже рассотрен",
+    'SupportNotFoundException': u"Оператор с таким идентификатором не найден",
+    'PromoNotFoundException': u"Поощрение с таким идентификатором не найдено",
+    'GroupNotFoundException': u"Группа с таким идентификатором не найдена"
 }

@@ -9,7 +9,7 @@ from ...service.agent import create_agent_start, get_agent, delete_agent, \
     update_agent, get_agent_by_user, get_all_agents
 from ...service.support import get_support_by_user
 from ...service.user_group import get_all_groups_of_company
-from ...service.user_group import get_group
+from ...service.user_group import get_group_by_id
 from api.permissions import IsAdminOrReadOnly, IsSupport, IsAdmin, \
     IsAdminOrGroupSupport, IsSuperAdmin
 from ..serializers.agent import CreateAgentStartSerializer, AgentSerializer, \
@@ -33,7 +33,7 @@ class AgentListView(APIView):
         request_user = request.user
         if serializer.is_valid():
             group_id = serializer.validated_data['group_id']
-            group = get_group(group_id, request.user)
+            group = get_group_by_id(group_id, request.user)
             self.check_object_permissions(self.request, group)
             user_data = create_agent_start(serializer, request_user)
             #TODO можно ли создавать агентов, если нет стартового задания?
@@ -81,7 +81,7 @@ class AgentDetailView(APIView):
         
         if serializer.is_valid():
             new_group_id = serializer.validated_data['group_id']
-            new_group = get_group(new_group_id, request.user)
+            new_group = get_group_by_id(new_group_id, request.user)
             self.check_object_permissions(self.request, old_group)
             self.check_object_permissions(self.request, new_group)
             update_agent(agent, serializer, new_group)

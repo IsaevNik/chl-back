@@ -11,7 +11,7 @@ import support
 import pays
 from api.controllers.web.user_group import UserGroupListView, UserGroupDetailView
 from api.controllers.web.subscription_type import SubscriptionTypeListView
-from api.controllers.web.promo import PromoListView
+from api.controllers.web.promo import PromoListView, PromoDetailView
 from api.controllers.web.task import TaskListView, TaskDetailView
 from api.controllers.web.company import CompanyView
 
@@ -25,6 +25,7 @@ urlpatterns = [
     url(r'^user-groups/$', UserGroupListView.as_view()),
     url(r'^user-groups/(?P<id>[0-9]+)/$', UserGroupDetailView.as_view()),
     url(r'^promos/$', PromoListView.as_view()),
+    url(r'^promos/(?P<id>[0-9]+)/$', PromoDetailView.as_view()),
     url(r'^agents/', include(agent)),
     url(r'^tasks/', include(task)),
     url(r'^subscriptions/', include(subscription)),

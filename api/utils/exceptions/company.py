@@ -11,3 +11,12 @@ class AgentLimitException(AbstractException):
 
 class SubcriptionTimeOutException(AbstractException):
 	pass
+
+class SupportNotFoundException(AbstractException):
+	pass
+
+class PromoNotFoundException(AbstractException):
+	pass
+
+class GroupNotFoundException(AbstractException):
+	pass

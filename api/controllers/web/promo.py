@@ -4,21 +4,21 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from ..serializers.promo import PromoCreateSerializer, PromoSerializer
-from api.service.promo import create_promo, get_all_promo_of_company
-from api.permissions import IsAdmin, IsAdminOrGroupSupportAndReadOnly, IsAdminOrReadOnly
+from ..serializers.promo import PromoCreateSerializer, PromoListSerializer, \
+    PromoDetailSerializer
+from api.service.promo import create_promo, get_all_promo_of_company, \
+    get_promo_by_id
+from api.permissions import IsAdminOrReadOnly, IsThisCompanyObject
 from ..renderers import JsonRenderer
 from ...utils.exceptions.commons import RequestValidationException
 
 
 class PromoListView(APIView):
-
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsAdminOrGroupSupportAndReadOnly)
+    permission_classes = (IsAuthenticated, IsAdminOrReadOnly)
     renderer_classes = (JsonRenderer,)
 
-    @staticmethod
-    def post(request):
+    def post(self, request):
         serializer = PromoCreateSerializer(data=request.data)
         if serializer.is_valid():
             create_promo(serializer, request.user)
@@ -26,37 +26,35 @@ class PromoListView(APIView):
         else:
             raise RequestValidationException(serializer)
 
-    @staticmethod
-    def get(request):
+    def get(self, request):
         promos = get_all_promo_of_company(request.user)
-        serializer = PromoSerializer(promos, many=True)
+        serializer = PromoListSerializer(promos, many=True)
         return Response(serializer.data)
 
 
-'''class UserGroupDetailView(APIView):
-
+class PromoDetailView(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsAdminOrGroupSupportAndReadOnly)
+    permission_classes = (IsAuthenticated, IsAdminOrReadOnly, IsThisCompanyObject)
     renderer_classes = (JsonRenderer,)
 
     def get(self, request, id):
-        group = get_group(id, request.user)
-        self.check_object_permissions(self.request, group)
-        serializer = UserGroupSerializer(group)
+        promo = get_promo_by_id(id)
+        self.check_object_permissions(self.request, promo)
+        serializer = PromoDetailSerializer(promo)
         return Response(serializer.data)
 
+    def delete(self, request, id):
+        promo = get_promo_by_id(id)
+        self.check_object_permissions(self.request, promo)
+        delete_promo(promo)
+        return Response()
+
     def put(self, request, id):
-        group = get_group(id, request.user)
-        self.check_object_permissions(self.request, group)
-        serializer = UserGroupCreateSerializer(data=request.data)
+        promo = get_promo_by_id(id)
+        self.check_object_permissions(self.request, promo)
+        serializer = PromoCreateSerializer(data=request.data)
         if serializer.is_valid():
-            update_group(group, serializer, request.user)
+            serializer.update(promo, serializer.validated_data)
             return Response()
         else:
             raise RequestValidationException(serializer)
-
-    def delete(self, request, id):
-        group = get_group(id, request.user)
-        self.check_object_permissions(self.request, group)
-        delete_group(group)
-        return Response()'''

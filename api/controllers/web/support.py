@@ -11,7 +11,7 @@ from ...service.support import create_support_start, create_support_finish, \
      recover_password_finish
 from ...service.base_service import logout_user, auth_user
 from api.permissions import IsAdmin, IsAdminOrSuperAdmin, \
-    IsCompanyActive, IsSupportInstance, IsThisCompanyMember
+    IsCompanyActive, IsSupportInstance, IsThisCompanyObject
 from ..serializers.support import SupportListSerializer, CreateSupportStartSerializer, \
     CreateSupportFinishSerializer, AuthSupportSerializer, SupportDetailSerializer
 from ...utils.exceptions.commons import RequestValidationException
@@ -93,7 +93,7 @@ class SupportDetailView(APIView):
     Представление объекта Support
     '''
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsAdmin, IsThisCompanyMember, 
+    permission_classes = (IsAuthenticated, IsAdmin, IsThisCompanyObject, 
                           IsCompanyActive)
     renderer_classes = (JsonRenderer,)
 
