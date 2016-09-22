@@ -13,6 +13,8 @@ errors = {
     'FamilyAlreadyExistException': u"У данного пользователя уже есть семья",
     'InvalidEmailException': u"Проверьте правильность введённого логина",
     'AdminDeleteException': u"Нельзя удалить администратора",
+    'EditYourSelfException': u"Нельзя редактировать свой профиль",
+    'InvalidTokenException': u"Токен - не действителен",
     'ChangeAdminToSupportException': u"Вы не можете поменять свою роль на 'Оператор'",
     'LoginAlredyExistException': u"Пользователь с таким логином уже существует",
     'SupportRoleException': u"Пользователя с данной ролью создать невозможно",

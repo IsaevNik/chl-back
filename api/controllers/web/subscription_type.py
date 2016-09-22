@@ -9,13 +9,12 @@ from ..renderers import JsonRenderer
 from ...utils.exceptions.commons import RequestValidationException
 
 class SubscriptionTypeListView(APIView):
-
+	
     authentication_classes = ()
     permission_classes = ()
     renderer_classes = (JsonRenderer,)
 
-    @staticmethod
-    def get(request):
+    def get(self, request):
         subscriptions = get_all_subscriptions()
         serializer = SubscriptionTypeSerializer(subscriptions, many=True)
         return Response(serializer.data)

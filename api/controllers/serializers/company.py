@@ -7,10 +7,18 @@ from django.db import transaction
 from api.models.company import Company
 
 
-class CompanyFullSerializer(serializers.ModelSerializer):
+class CompanyPartSerializer(serializers.ModelSerializer):
+
+    end_dt = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S", 
+                                       source='active_subscription.end_dt')
+
+    class Meta:
+        model = Company
+        fields = ('id', 'name', 'end_dt')
+
+class CompanyFullSerializer(CompanyPartSerializer):
 
     sub_type = serializers.CharField(source='active_subscription.subscription_type.title')
-    end_dt = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S", source='active_subscription.end_dt')
     screens = serializers.SerializerMethodField()
 
     class Meta:
@@ -21,14 +29,14 @@ class CompanyFullSerializer(serializers.ModelSerializer):
             'screens', 'invite_text', 'checking_acc', 'bank_name', 'ogrn', 'inn', 'kpp', 'ur_address')
 
     def get_screens(self, obj):
-        data = json.loads(obj.screens)
-        return data
+        try:
+            data = json.loads(obj.screens)
+            return data
+        except ValueError:
+            return []
 
-class CompanyPartSerializer(serializers.ModelSerializer):
 
-    class Meta:
-        model = Company
-        fields = ('id', 'name', 'logo_img')
+
 
 class RegCompanyStartSerializer(serializers.Serializer):
     name = serializers.CharField()
@@ -54,8 +62,6 @@ class RegCompanyStartSerializer(serializers.Serializer):
 
 class CompanyUpdateSerializer(serializers.Serializer):
     name = serializers.CharField()
-    contact_person_first_name = serializers.CharField()
-    contact_person_last_name = serializers.CharField()
     contact_person_phone = serializers.CharField()
     address = serializers.CharField()
     logo_img = serializers.CharField(default="img/default_logo.png")
@@ -70,8 +76,6 @@ class CompanyUpdateSerializer(serializers.Serializer):
 
     def update(self, company, validated_data):
         company.name = validated_data['name']
-        company.contact_person_first_name = validated_data['contact_person_first_name']
-        company.contact_person_last_name = validated_data['contact_person_last_name']
         company.contact_person_phone = validated_data['contact_person_phone']
         company.address = validated_data['address']
         company.logo_img = validated_data['logo_img']

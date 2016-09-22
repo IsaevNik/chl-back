@@ -8,3 +8,7 @@ class AdminDeleteException(AbstractException):
 
 class ChangeAdminToSupportException(AbstractException):
 	pass
+
+class EditYourSelfException(AbstractException):
+	pass
+	

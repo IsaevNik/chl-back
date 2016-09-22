@@ -8,6 +8,7 @@ from api.controllers.serializers.company import CompanyFullSerializer
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from api.models.company import Company
+from base_service import get_object
 
 
 def create_company_start(company_serializer):
@@ -16,7 +17,7 @@ def create_company_start(company_serializer):
     '''
     if User.objects.filter(username=
                             company_serializer.validated_data['email']).exists():
-        raise EmailAlreadyExistException
+        raise EmailAlreadyExistException()
 
     company_data = company_serializer.validated_data
     support_data = {
@@ -37,6 +38,7 @@ def create_company_start(company_serializer):
 
     return token
 
+
 def update_company(company, serializer):
     #TODO write in log rewrite information
     serializer_for_write = CompanyFullSerializer(company)
@@ -46,5 +48,9 @@ def update_company(company, serializer):
 
 
 def get_all_company():
-    return Company.objects.all()
+    return Company.objects.all().order_by('name')
 
+
+def get_company_by_id(id):
+    company = get_object(Company, id)
+    return company

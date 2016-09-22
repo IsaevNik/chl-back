@@ -5,3 +5,6 @@ from . import errors
 
 class SupportRoleException(AbstractException):
     pass
+
+class InvalidTokenException(AbstractException):
+	pass

@@ -13,10 +13,11 @@ from api.utils.exceptions.user import UsernameAlreadyExistException, \
     EmailAlreadyExistException, FamilyAlreadyExistException
 from api.utils.exceptions.auth import InvalidCredentialsException, \
     InvalidEmailException
-from api.utils.exceptions.registration import SupportRoleException
+from api.utils.exceptions.registration import SupportRoleException, \
+    InvalidTokenException
 from api.utils.exceptions.company import SupportLimitException
 from api.utils.exceptions.admin import AdminDeleteException
-from base_service import get_all, get_object
+from base_service import get_all, get_object, auth_user
 from api.models.company import Company
 from api.models.support import Support
 from api.models.subscription_type import SubscriptionType
@@ -29,14 +30,13 @@ def create_support_start(serializer, request_user):
     Создание экземпляра класса Support, сериализация его и запись в кеш 
     и отправка токена на фронт для создания ссылки подтверждения почты
     '''
-
-    if User.objects.filter(username=serializer.validated_data['email']).exists():
-        raise EmailAlreadyExistException()
-    
     company = get_support_by_user(request_user).company
     if company.supports_left < 1:
         raise SupportLimitException()
 
+    if User.objects.filter(username=serializer.validated_data['email']).exists():
+        raise EmailAlreadyExistException()
+    
     if serializer.validated_data['role'] in [1,3,4]:
         raise SupportRoleException()
 
@@ -50,23 +50,26 @@ def create_support_start(serializer, request_user):
     return token
 
 
-def create_support_finish(serializer, is_admin=False):
+def create_support_finish(serializer):
     '''
-    Окончание создания оператора, если функция выполняется в контексте 
-    регистрации компании, то is_admin=True
+    Окончание создания оператора
     '''
     token = serializer.validated_data['token']
     password = serializer.validated_data['password']
     email = serializer.validated_data['email']
 
-    support = pickle.loads(cache.get(token))
+    try:
+        support = pickle.loads(cache.get(token))
+    except TypeError:
+        raise InvalidTokenException()
 
     if support.user.email != email:
         raise InvalidEmailException()
 
     cache.delete(token)
-
-    if is_admin:
+    
+    #если оператор завершает регистрацию в контексте создания компании
+    if support.role == 1:
         start_sub_type = SubscriptionType.objects.get(price=0)
         support.company.task_left = start_sub_type.task_limit
         company = support.company.save()
@@ -77,7 +80,6 @@ def create_support_finish(serializer, is_admin=False):
             status=2,
             subscription_type=start_sub_type
         )
-
 
     support.user.save()
     user = User.objects.get(email=email)
@@ -146,4 +148,40 @@ def get_all_groups_of_support(support):
         return UserGroup.objects.filter(support=support)
 
 
-    
+def recover_password_start(form):
+    email = form.cleaned_data['email']
+
+    try:
+        user = User.objects.get(username=email)
+    except User.DoesNotExist:
+        raise InvalidEmailException()
+    try:
+        support = get_support_by_user(user)
+    except Support.DoesNotExist:
+        raise InvalidEmailException()
+
+    token = hashlib.sha256(support.user.email + str(datetime.now())).hexdigest()
+    cache.set(token, pickle.dumps(support), 60*60*24)
+
+    #TODO отправка письма с приглашением (ссылка с токеном, логин, пароль) на почту созданного Support 
+
+    return token
+
+
+def recover_password_finish(serializer):
+    token = serializer.validated_data['token']
+    password = serializer.validated_data['password']
+    email = serializer.validated_data['email']
+
+    try:
+        support = pickle.loads(cache.get(token))
+    except TypeError:
+        raise InvalidTokenException()
+    if support.user.email != email:
+        raise InvalidEmailException()
+
+    cache.delete(token)
+    support.user.set_password(password)
+    support.user.save()
+
+    return auth_user(email, password)

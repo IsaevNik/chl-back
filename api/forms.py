@@ -13,4 +13,5 @@ class TaskDistanceForm(forms.Form):
     longitude = forms.FloatField()
 #   page = forms.IntegerField(required=False)
 
-
+class RecoverPasswordForm(forms.Form):
+	email = forms.CharField()

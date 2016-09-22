@@ -5,13 +5,16 @@ from api.models.support import Support
 from api.models.agent import Agent
 from api.utils.exceptions.company import SubcriptionTimeOutException
 
-
+# checked
 class IsAdminOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        return Support.get_support_by_user(request.user).is_admin
-
+        try:
+            support = Support.get_support_by_user(request.user)
+            if request.method in permissions.SAFE_METHODS:
+                return True
+            return support.is_admin
+        except Support.DoesNotExist:
+            return False
 
 # checked
 class IsAdmin(permissions.BasePermission):
@@ -19,6 +22,20 @@ class IsAdmin(permissions.BasePermission):
         try:
             support = Support.get_support_by_user(request.user)
             return support.is_admin
+        except Support.DoesNotExist:
+            return False
+
+#checked
+class IsCompanyActiveOrReadOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        try:
+            support = Support.get_support_by_user(request.user)
+            if request.method in permissions.SAFE_METHODS:
+                return True
+            if support.company.time_to_finish_subscription < timezone.now():
+                raise SubcriptionTimeOutException()
+            else:
+                return True
         except Support.DoesNotExist:
             return False
 
@@ -35,7 +52,6 @@ class IsCompanyActive(permissions.BasePermission):
             return False
 
 
-
 class IsAdminOrBooker(permissions.BasePermission):
     def has_permission(self, request, view):
         support = Support.get_support_by_user(request.user)
@@ -44,6 +60,17 @@ class IsAdminOrBooker(permissions.BasePermission):
         if support.is_admin or support.is_booker:
             return True
         else:
+            return False
+
+#checked
+class IsThisCompanyMember(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        try:
+            support = Support.get_support_by_user(request.user)
+            if support.is_superadmin and (request.method in permissions.SAFE_METHODS):
+                return True
+            return support.company == obj.company
+        except Support.DoesNotExist:
             return False
 
 
@@ -69,10 +96,14 @@ class IsAdminOrGroupSupport(permissions.BasePermission):
         else:
             return False
 
-
+#checked
 class IsSuperAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
-        return Support.get_support_by_user(request.user).is_superadmin
+        try:
+            support = Support.get_support_by_user(request.user)
+            return support.is_superadmin
+        except Support.DoesNotExist:
+            return False
 
 
 #checked

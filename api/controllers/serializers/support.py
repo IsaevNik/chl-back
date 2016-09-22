@@ -5,23 +5,38 @@ from rest_framework import serializers
 from api.models.support import Support
 
 
-class SupportSerializer(serializers.ModelSerializer):
+class SupportListSerializer(serializers.ModelSerializer):
+
+    email = serializers.EmailField(source='user.email')
+    company = serializers.CharField(source='company.name')
+
+    class Meta:
+        model = Support
+        fields = ('id', 'name', 'email', 'company')
+
+
+class SupportDetailSerializer(SupportListSerializer):
     '''
     Сериалайзер модели Support для получения 
     данных связанных с моделью
     '''
     name = serializers.CharField()
-    email = serializers.EmailField(source='user.email')
     role = serializers.SerializerMethodField()
     post = serializers.CharField(required=False)
-    company = serializers.CharField(source='company.name')  
+    groups = serializers.SerializerMethodField() 
 
     class Meta:
         model = Support
-        fields = ('id', 'name', 'email', 'company', 'role', 'post')
+        fields = ('id', 'name', 'email', 'company', 'role', 'post', 'groups')
 
-    def get_role(self,obj):
+    def get_role(self, obj):
         return obj.get_role_display()
+
+    def get_groups(self, obj):
+        data = []
+        for group in obj.groups.all():
+            data.append({'id': group.id, 'name': group.name})
+        return data
 
     
 class CreateSupportStartSerializer(serializers.Serializer):
