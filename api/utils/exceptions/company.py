@@ -3,20 +3,15 @@ from api.utils.exceptions import AbstractException
 from . import errors
 
 
-class SupportLimitException(AbstractException):
-    pass
-
-class AgentLimitException(AbstractException):
-    pass
-
-class SubcriptionTimeOutException(AbstractException):
-	pass
-
 class SupportNotFoundException(AbstractException):
-	pass
+    pass
 
 class PromoNotFoundException(AbstractException):
-	pass
+    pass
 
 class GroupNotFoundException(AbstractException):
-	pass
+    pass
+
+class CompanyNotFoundException(AbstractException):
+    pass
+

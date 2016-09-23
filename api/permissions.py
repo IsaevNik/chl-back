@@ -1,9 +1,11 @@
+# coding=utf-8
 from rest_framework import permissions
 from django.utils import timezone
 
 from api.models.support import Support
 from api.models.agent import Agent
-from api.utils.exceptions.company import SubcriptionTimeOutException
+from api.models.subscription import Subscription
+from api.utils.exceptions.subscription import SubcriptionTimeOutException
 
 # checked
 class IsAdminOrReadOnly(permissions.BasePermission):
@@ -51,22 +53,37 @@ class IsCompanyActive(permissions.BasePermission):
         except Support.DoesNotExist:
             return False
 
-
+#checked
 class IsAdminOrBooker(permissions.BasePermission):
     def has_permission(self, request, view):
-        support = Support.get_support_by_user(request.user)
-        if request.method in permissions.SAFE_METHODS and support.is_superadmin:
-            return True
-        if support.is_admin or support.is_booker:
-            return True
-        else:
+        try:
+            support = Support.get_support_by_user(request.user)
+        except Support.DoesNotExist:
             return False
+
+        return (request.method in permissions.SAFE_METHODS and support.is_superadmin) or \
+               (support.is_admin or support.is_booker)
+
+#checked
+class IsAdminReadOnlyOrBooker(permissions.BasePermission):
+    def has_permission(self, request, view):
+        try:
+            support = Support.get_support_by_user(request.user)
+        except Support.DoesNotExist:
+            return False
+
+        return (request.method in permissions.SAFE_METHODS and support.is_superadmin) or \
+               (request.method in permissions.SAFE_METHODS and support.is_admin) \
+               or support.is_booker
 
 #checked
 class IsThisCompanyObject(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         try:
             support = Support.get_support_by_user(request.user)
+            # бухгалтер имеет доступ к подпискам компании
+            if isinstance(obj, Subscription) and support.is_booker:
+                return True
             if support.is_superadmin and (request.method in permissions.SAFE_METHODS):
                 return True
             return support.company == obj.company

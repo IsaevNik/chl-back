@@ -9,6 +9,10 @@ from api.models.subscription import Subscription
 from api.models.subscription_type import SubscriptionType
 from api.models.company import Company
 from base_service import get_object
+from subscription_type import get_subscription_type_by_id
+from company import get_company_by_id
+from api.utils.exceptions.subscription import SubscriptionStatusException, \
+    SubscriptionNotFoundException
 
 
 def create_subscription(serializer, support):
@@ -18,15 +22,28 @@ def create_subscription(serializer, support):
         company_id = data.get('company_id', 0)
         data['start_dt'] = datetime.now()
     if support.is_admin:
+        if data['status'] != 1:
+            raise SubscriptionStatusException()
         company_id = support.company.id
-    company = get_object(Company, company_id)
+    company = get_company_by_id(company_id)
 
     subscription_type_id = data.get('subscription_type_id', 0)
-    subscription_type = get_object(SubscriptionType, subscription_type_id)
+    subscription_type = get_subscription_type_by_id(subscription_type_id)
     
-    sub_id = serializer.create(data, company, subscription_type)
+    subscription_id = serializer.create(data, company, subscription_type)
     if support.is_admin:
-        return sub_id 
+        return subscription_id 
+
+
+def update_subscription(serializer, subscription):
+    data = serializer.validated_data
+    if not data['status'] in [2,3]:
+        raise SubscriptionStatusException()
+    company = get_company_by_id(data['company_id'])
+    if data['status'] == 2:
+        data['start_dt'] = datetime.now()
+    serializer.update(subscription, data)
+
 
 def get_all_subscriptions(support):
     if support.is_booker or support.is_superadmin:
@@ -44,11 +61,11 @@ def create_payonline_link(sub_id):
     return link
 
 
-def get_subscription_by_id(sub_id, support):
-    subscription = get_object(Subscription, sub_id)
-    if support.is_admin:
-        if subscription.company != support.company:
-            raise NotFound
+def get_subscription_by_id(id):
+    try:
+        subscription = Subscription.objects.get(id=id)
+    except Subscription.DoesNotExist:
+        raise SubscriptionNotFoundException()
     return subscription
 
 

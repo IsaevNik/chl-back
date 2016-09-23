@@ -6,12 +6,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, renderer_classes, \
     permission_classes
 
-from ..serializers.subscription import SubscriptionSerializer, \
-    CreateSubscriptionSerializer
+from ..serializers.subscription import SubscriptionListSerializer, \
+    CreateSubscriptionSerializer, SubscriptionDetailSerializer
 from ...service.subscription import create_subscription, get_all_subscriptions, \
-    create_payonline_link, get_subscription_by_id, check_transaction
+    create_payonline_link, get_subscription_by_id, check_transaction,\
+    update_subscription
 from ...service.support import get_support_by_user
-from api.permissions import IsAdmin, IsAdminOrGroupSupport, IsAdminOrBooker
+from api.permissions import IsAdmin, IsAdminOrGroupSupport, IsAdminOrBooker, \
+    IsAdminReadOnlyOrBooker, IsThisCompanyObject
 from ..renderers import JsonRenderer
 from ...utils.exceptions.commons import RequestValidationException
 from ...utils.exceptions.pay import OrderNotExistException
@@ -28,6 +30,7 @@ class SubscriptionListView(APIView):
         serializer = CreateSubscriptionSerializer(data=request.data)
         if serializer.is_valid():
             sub_id = create_subscription(serializer, support)
+            #если оплата производится в автоматическом режиме(по запросу администратора)
             if sub_id:
                 link = create_payonline_link(sub_id)
                 return Response({'link': link})
@@ -36,30 +39,35 @@ class SubscriptionListView(APIView):
         else: 
             raise RequestValidationException(serializer)
 
-    
     def get(self, request):
         support = get_support_by_user(request.user)
         subscriptions = get_all_subscriptions(support)
-        serializer = SubscriptionSerializer(subscriptions, many=True)
+        serializer = SubscriptionListSerializer(subscriptions, many=True)
         return Response(serializer.data)
+
 
 class SubscriptionDetailView(APIView):
 
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsAdminOrBooker)
+    permission_classes = (IsAuthenticated, IsAdminReadOnlyOrBooker, 
+                          IsThisCompanyObject)
     renderer_classes = (JsonRenderer,)
 
     def get(self, request, id):
-        support = get_support_by_user(request.user)
-        subscription = get_subscription_by_id(id, support)
-        serializer = SubscriptionSerializer(subscription)
+        subscription = get_subscription_by_id(id)
+        self.check_object_permissions(self.request, subscription)
+        serializer = SubscriptionDetailSerializer(subscription)
         return Response(serializer.data)
 
-    '''def put(self, request, id):
-        support = get_support_by_user(request.user)
-        subscription = get_subscription_by_id(id, support)
+    def put(self, request, id):
+        subscription = get_subscription_by_id(id)
         serializer = CreateSubscriptionSerializer(data=request.data)
-        if serializer.is_valid():'''
+        if serializer.is_valid():
+            update_subscription(serializer, subscription)
+        else: 
+            raise RequestValidationException(serializer)
+        return Response()    
+
 
 @api_view(['GET'])
 @renderer_classes([JsonRenderer])
@@ -69,6 +77,6 @@ def put_order_id(request):
     if order_id:
         response = check_transaction(order_id)
     else:
-        raise OrderNotExistException
+        raise OrderNotExistException()
 
     return Response()

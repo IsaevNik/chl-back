@@ -15,8 +15,8 @@ from api.utils.exceptions.auth import InvalidCredentialsException, \
     InvalidEmailException
 from api.utils.exceptions.registration import SupportRoleException, \
     InvalidTokenException
-from api.utils.exceptions.company import SupportLimitException, \
-    SupportNotFoundException
+from api.utils.exceptions.company import SupportNotFoundException
+from api.utils.exceptions.subscription import SupportLimitException
 from api.utils.exceptions.admin import AdminDeleteException
 from base_service import get_all, get_object, auth_user
 from api.models.company import Company
@@ -117,13 +117,10 @@ def get_all_supports_of_company(user):
         return Support.objects.filter(company=company)
 
 
-def get_support_by_id(id, user):
-    company = Support.get_company_by_user(user)
+def get_support_by_id(id):
     try:
         support = Support.objects.get(id=id)
     except Support.DoesNotExist:
-        raise SupportNotFoundException()
-    if support.company != company:
         raise SupportNotFoundException()
     return support
 

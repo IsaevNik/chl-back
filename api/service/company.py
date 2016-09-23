@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from django.core.cache import cache
 from api.models.company import Company
 from base_service import get_object
+from api.utils.exceptions.company import CompanyNotFoundException
 
 
 def create_company_start(company_serializer):
@@ -25,7 +26,7 @@ def create_company_start(company_serializer):
         'first_name': company_data['contact_person_first_name'],
         'last_name': company_data['contact_person_last_name'],
         'role': 1,
-        'post': ''
+        'post': 'Администратор'
     }
     support_serializer = CreateSupportStartSerializer(data=support_data)
 
@@ -52,5 +53,8 @@ def get_all_company():
 
 
 def get_company_by_id(id):
-    company = get_object(Company, id)
+    try:
+        company = Company.objects.get(id=id)
+    except Company.DoesNotExist:
+        raise CompanyNotFoundException()
     return company

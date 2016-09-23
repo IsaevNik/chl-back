@@ -43,5 +43,9 @@ errors = {
     'PayAlreadyCheckException': u"Данный запрос на выплату уже рассотрен",
     'SupportNotFoundException': u"Оператор с таким идентификатором не найден",
     'PromoNotFoundException': u"Поощрение с таким идентификатором не найдено",
-    'GroupNotFoundException': u"Группа с таким идентификатором не найдена"
+    'GroupNotFoundException': u"Группа с таким идентификатором не найдена",
+    'CompanyNotFoundException': u"Компания с таким идентификатором не найдена",
+    'SubscriptionTypeNotFoundException': u"Нет такого типа подписки",
+    'SubscriptionStatusException': u"Вы не можете создать подписку с таким статусом",
+    'SubscriptionNotFoundException': u"Операции с заданным идентификатором не существует"
 }

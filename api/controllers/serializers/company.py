@@ -18,7 +18,7 @@ class CompanyPartSerializer(serializers.ModelSerializer):
 
 class CompanyFullSerializer(CompanyPartSerializer):
 
-    sub_type = serializers.CharField(source='active_subscription.subscription_type.title')
+    sub_type = serializers.SerializerMethodField()
     screens = serializers.SerializerMethodField()
 
     class Meta:
@@ -35,7 +35,9 @@ class CompanyFullSerializer(CompanyPartSerializer):
         except ValueError:
             return []
 
-
+    def get_sub_type(self, obj):
+        return {"id": obj.active_subscription.subscription_type.id,
+                "title": obj.active_subscription.subscription_type.title}
 
 
 class RegCompanyStartSerializer(serializers.Serializer):

@@ -8,14 +8,15 @@ from ..serializers.promo import PromoCreateSerializer, PromoListSerializer, \
     PromoDetailSerializer
 from api.service.promo import create_promo, get_all_promo_of_company, \
     get_promo_by_id
-from api.permissions import IsAdminOrReadOnly, IsThisCompanyObject
+from api.permissions import IsAdminOrReadOnly, IsThisCompanyObject, \
+    IsCompanyActiveOrReadOnly
 from ..renderers import JsonRenderer
 from ...utils.exceptions.commons import RequestValidationException
 
 
 class PromoListView(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsAdminOrReadOnly)
+    permission_classes = (IsAuthenticated, IsAdminOrReadOnly, IsCompanyActiveOrReadOnly)
     renderer_classes = (JsonRenderer,)
 
     def post(self, request):
@@ -34,7 +35,8 @@ class PromoListView(APIView):
 
 class PromoDetailView(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsAdminOrReadOnly, IsThisCompanyObject)
+    permission_classes = (IsAuthenticated, IsAdminOrReadOnly, IsThisCompanyObject, 
+        IsCompanyActiveOrReadOnly)
     renderer_classes = (JsonRenderer,)
 
     def get(self, request, id):

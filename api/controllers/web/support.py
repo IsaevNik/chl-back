@@ -11,7 +11,7 @@ from ...service.support import create_support_start, create_support_finish, \
      recover_password_finish
 from ...service.base_service import logout_user, auth_user
 from api.permissions import IsAdmin, IsAdminOrSuperAdmin, \
-    IsCompanyActive, IsSupportInstance, IsThisCompanyObject
+    IsCompanyActive, IsSupportInstance, IsThisCompanyObject, IsCompanyActiveOrReadOnly
 from ..serializers.support import SupportListSerializer, CreateSupportStartSerializer, \
     CreateSupportFinishSerializer, AuthSupportSerializer, SupportDetailSerializer
 from ...utils.exceptions.commons import RequestValidationException
@@ -94,25 +94,25 @@ class SupportDetailView(APIView):
     '''
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsAdmin, IsThisCompanyObject, 
-                          IsCompanyActive)
+                          IsCompanyActiveOrReadOnly)
     renderer_classes = (JsonRenderer,)
 
     def get(self, request, id):
-        support = get_support_by_id(id, request.user)
+        support = get_support_by_id(id)
         self.check_object_permissions(self.request, support)
         serializer = SupportDetailSerializer(support)
         return Response(serializer.data)
 
     @transaction.atomic
     def delete(self, request, id):
-        support = get_support_by_id(id, request.user)
+        support = get_support_by_id(id)
         self.check_object_permissions(self.request, support)
         delete_support(support)
         return Response()
 
     @transaction.atomic
     def put(self, request, id):
-        support = get_support_by_id(id, request.user)
+        support = get_support_by_id(id)
         self.check_object_permissions(self.request, support)
         if support == get_support_by_user(request.user):
             raise EditYourSelfException()

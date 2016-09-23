@@ -6,7 +6,7 @@ import json
 
 from django.contrib.auth.models import User
 from api.utils.exceptions.user import LoginAlredyExistException
-from api.utils.exceptions.company import AgentLimitException
+from api.utils.exceptions.subscription import AgentLimitException
 from rest_framework.exceptions import NotFound
 
 from api.models.agent import Agent

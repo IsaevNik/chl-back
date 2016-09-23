@@ -14,10 +14,18 @@ class UserGroupDetailSerializer(serializers.ModelSerializer):
     Сериалайзер для модели UserGroup для получения связанных с ней 
     данных
     '''
-    promos = serializers.CharField(source='promos.title')
+    promos = serializers.SerializerMethodField()
+    support = serializers.SerializerMethodField()
+
     class Meta:
         model = UserGroup
         fields = ('id', 'name', 'support', 'promos')
+
+    def get_support(self, obj):
+        return {"id": obj.support.id, "name": obj.support.name}
+
+    def get_promos(self, obj):
+        return {"id": obj.promos.id, "name": obj.promos.title}
 
 
 class UserGroupCreateSerializer(serializers.Serializer):

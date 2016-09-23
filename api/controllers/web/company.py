@@ -27,12 +27,9 @@ class CompanyView(APIView):
 
     def get(self, request):
         user = request.user
-        if is_support(user):
-            support = get_support_by_user(user)
-            serializer = CompanyFullSerializer(support.company)
-            return Response(serializer.data)
-        else:
-            raise PermissionDenied()
+        support = get_support_by_user(user)
+        serializer = CompanyFullSerializer(support.company)
+        return Response(serializer.data)
 
     def put(self, request):
         support = get_support_by_user(request.user)

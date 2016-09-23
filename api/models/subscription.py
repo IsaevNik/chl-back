@@ -18,7 +18,7 @@ class Subscription(models.Model):
     TYPE_CHOICES = (
         (IN_PROGRESS, 'Проверяется'),
         (CONFIRMED, 'Подтвержден'),
-        (DISCARDED, 'Откланен'),
+        (DISCARDED, 'Отклонен'),
         (LATE, 'Просрочен')
     )
 
