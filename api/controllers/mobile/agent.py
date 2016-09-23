@@ -8,7 +8,7 @@ from django.db import transaction
 from ...service.agent import get_agent_by_user, is_first_auth, set_agent_device
 from ...service.base_service import logout_user, auth_user, get_user_by_token
 from ...service.task import get_start_task_by_company
-from ..serializers.agent import AgentSerializer, \
+from ..serializers.agent import AgentDetailSerializer, \
     AuthAgentSerializer, FirstAuthAgentSerializer
 from ...utils.exceptions.commons import RequestValidationException
 from ..renderers import JsonRenderer
@@ -54,7 +54,7 @@ class AgentProfileView(APIView):
     @staticmethod
     def get( request):
         agent = get_agent_by_user(request.user)
-        serializer = AgentSerializer(agent)
+        serializer = AgentDetailSerializer(agent)
         return Response(serializer.data)
 
 

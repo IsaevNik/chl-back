@@ -90,7 +90,7 @@ class IsThisCompanyObject(permissions.BasePermission):
         except Support.DoesNotExist:
             return False
 
-
+#checked
 class IsAdminOrGroupSupportAndReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         company = obj.support.company
@@ -101,14 +101,14 @@ class IsAdminOrGroupSupportAndReadOnly(permissions.BasePermission):
         except Support.DoesNotExist:
             return False
 
-
+#checked
 class IsAdminOrGroupSupport(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        support = Support.get_support_by_user(request.user)
-        if (obj.support == support or 
-            support.company == obj.support.company and support.is_admin):
-            return True
-        else:
+        try:
+            support = Support.get_support_by_user(request.user)
+            return (obj.support == support or 
+            support.company == obj.support.company and support.is_admin)
+        except Support.DoesNotExist:
             return False
 
 #checked
@@ -139,6 +139,16 @@ class IsSupportInstance(permissions.BasePermission):
             return False
         return True
 
+#checked
+class IsSupportOrAdminOrSuperAdminRO(permissions.BasePermission):
+    def has_permission(self, request, view):
+        try:
+            support = Support.get_support_by_user(request.user)
+            return support.is_admin or support.is_operator or \
+                   (support.is_superadmin and request.method in permissions.SAFE_METHODS)
+        except Support.DoesNotExist:
+            return False
+
 
 class IsSupport(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -149,7 +159,6 @@ class IsSupport(permissions.BasePermission):
         if support.is_booker:
             return False
         return True
-
 
 class IsThisGroupMember(permissions.BasePermission):
     def has_object_permission(self, request, view, obj): 

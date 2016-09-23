@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from api.models.pay import Pay
 from api.models.task_filled import TaskFilled
-from agent import AgentSerializer
+from agent import AgentListSerializer
 
 
 class PaySerializer(serializers.ModelSerializer):
@@ -24,7 +24,7 @@ class PayDetailWebSerializer(PaySerializer):
     tasks = serializers.SerializerMethodField()
     last_pay = serializers.SerializerMethodField()
     description = serializers.CharField(source='agent.group.promos.description')
-    agent = AgentSerializer()
+    agent = AgentListSerializer()
 
     class Meta:
         model = Pay

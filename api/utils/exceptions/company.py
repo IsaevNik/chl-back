@@ -15,3 +15,5 @@ class GroupNotFoundException(AbstractException):
 class CompanyNotFoundException(AbstractException):
     pass
 
+class AgentNotFoundException(AbstractException):
+	pass

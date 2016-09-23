@@ -47,5 +47,6 @@ errors = {
     'CompanyNotFoundException': u"Компания с таким идентификатором не найдена",
     'SubscriptionTypeNotFoundException': u"Нет такого типа подписки",
     'SubscriptionStatusException': u"Вы не можете создать подписку с таким статусом",
-    'SubscriptionNotFoundException': u"Операции с заданным идентификатором не существует"
+    'SubscriptionNotFoundException': u"Операции с заданным идентификатором не существует",
+    'AgentNotFoundException': u"Агент с таким идентификатором не существует"
 }

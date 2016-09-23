@@ -8,36 +8,60 @@ from api.models.user_group import UserGroup
 from api.models.purse import Purse
 
 
-class AgentSerializer(serializers.ModelSerializer):
+class AgentListSerializer(serializers.ModelSerializer):
     '''
     Сериалайзер модели Agent для получения 
     данных связанных с моделью
     '''
     login = serializers.CharField(source='user.username')
-    company = serializers.CharField(source='company.name')
-    balance = serializers.SerializerMethodField()
+    company = serializers.SerializerMethodField()
     platform = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Agent
+        fields = ('id', 'login', 'name', 'phone', 'company', 'platform')
+
+    def get_platform(self,obj):
+        return obj.get_platform_display()
+
+    def get_company(self, obj):
+        return {"id": obj.company.id, "name": obj.company.name}
+
+
+
+class AgentDetailSerializer(AgentListSerializer):
+    '''
+    Сериалайзер модели Agent для получения 
+    данных связанных с моделью
+    '''
+    balance = serializers.SerializerMethodField()
+
 
     class Meta:
         model = Agent
         fields = ('id', 'login', 'name', 'phone', 'company', 'group', \
                   'platform', 'post', 'device_id', 'balance')
 
-    def get_platform(self,obj):
-        return obj.get_platform_display()
-
     def get_balance(self, obj):
         return obj.purse.get_balance()
+
+    def get_group(self, obj):
+        return {"id": obj.group.id, "name": obj.group.name}
 
 
 class GroupWithAgentsSerializer(serializers.ModelSerializer):
     '''
     Сериалайзер
     '''
-    agents = AgentSerializer(many=True, read_only=True)
+    agents = AgentListSerializer(many=True, read_only=True)
+    support = serializers.SerializerMethodField()
+
     class Meta:
         model = UserGroup
-        fields = ('name', 'support','agents')
+        fields = ('id', 'name', 'support','agents')
+
+    def get_support(self, obj):
+        return {"id": obj.support.id, "name": obj.support.name}
 
     
 class CreateAgentStartSerializer(serializers.Serializer):

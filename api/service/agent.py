@@ -14,20 +14,22 @@ from api.models.purse import Purse
 from api.models.user_group import UserGroup
 from api.models.support import Support
 from base_service import get_object, auth_user
+from api.utils.exceptions.company import GroupNotFoundException, \
+    AgentNotFoundException
 
 
 def create_agent_start(serializer, request_user):
     company = Support.get_company_by_user(request_user)
     if company.agents_left < 1:
-        raise AgentLimitException
+        raise AgentLimitException()
 
     if User.objects.filter(username=serializer.validated_data['login']).exists():
-        raise LoginAlredyExistException
+        raise LoginAlredyExistException()
 
     try:
         user_group = UserGroup.objects.get(id=serializer.validated_data['group_id'])
     except UserGroup.DoesNotExist:
-        raise NotFound
+        raise GroupNotFoundException()
 
     agent = serializer.create(serializer.validated_data, company, user_group)
 
@@ -37,11 +39,11 @@ def create_agent_start(serializer, request_user):
     return user_data
 
 
-def get_agent(id, user):
-    company = Support.get_company_by_user(user)
-    agent = get_object(Agent, id)
-    if agent.company != company:
-        raise NotFound()
+def get_agent_by_id(id):
+    try:
+        agent = Agent.objects.get(id=id)
+    except Agent.DoesNotExist:
+        raise AgentNotFoundException()
     return agent
 
 

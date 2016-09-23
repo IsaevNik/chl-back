@@ -8,7 +8,7 @@ from api.models.task import Task
 from api.models.task_address import TaskAddress
 from task import TaskForManySerializer
 from point_filled import PointFilledSerializer
-from agent import AgentSerializer
+from agent import AgentListSerializer
 from task_address import TaskWithAddressSerializer
  
 class TaskForDetailSerializer(TaskForManySerializer):
@@ -54,7 +54,7 @@ class TaskFilledListWebSerializer(serializers.ModelSerializer):
     task_address = serializers.CharField(source='task_address.address')
     task = TaskShortWebSerializer(source='task_address.task')
     status = serializers.SerializerMethodField()
-    executer = AgentSerializer()
+    executer = AgentListSerializer()
     
     class Meta:
         model = TaskFilled
@@ -71,7 +71,7 @@ class TaskFilledDetailWebSerializer(serializers.ModelSerializer):
     check_dt = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S")
     task = TaskForDetailSerializer(source='task_address.task')
     filled_blanks = PointFilledSerializer(many=True)
-    executer = AgentSerializer()
+    executer = AgentListSerializer()
 
     class Meta:
         model = TaskFilled
