@@ -7,8 +7,10 @@ from api.models.task_filled import TaskFilled
 from api.models.point_blank import PointBlank
 from api.utils.exceptions.task import TaskLimitException
 from base_service import get_object
-from ..utils.exceptions.task import StartTaskAlreadyExist
+from ..utils.exceptions.task import StartTaskAlreadyExist, \
+    TaskNotFoundException, StartTaskNotExistException
 from agent import get_agent_by_user
+
 
 
 def get_data_for_task(json_task, user):
@@ -19,7 +21,7 @@ def get_data_for_task(json_task, user):
     data['price'] = json_task['price']
     data['start_dt'] = json_task['start_dt']
     data['finish_dt'] = json_task['finish_dt']
-    data['group_id'] = json_task.get('group_id', 0)
+    data['group_id'] = json_task.get('group_id', None)
     data['is_start'] = json_task.get('is_start', 0)
     return data
 
@@ -31,13 +33,12 @@ def create_task(serializer, support, group):
     if support.company.task_left < 1:
         raise TaskLimitException
     #Если указано что задание стартовое, попробовать найти 
-    #стартовое задание на текущий момент и снять у него флаг is_start
     if serializer.validated_data['is_start']:
         try:
             old_start_task = Task.objects.get(
                                 creater__company=support.company,
                                is_start=True)
-            raise StartTaskAlreadyExist
+            raise StartTaskAlreadyExist()
         except Task.DoesNotExist:
             pass
 
@@ -51,8 +52,11 @@ def update_task(serializer, task, support, new_group):
     return task
 
 
-def get_task(id):
-    task = get_object(Task, id)
+def get_task_by_id(id):
+    try:
+        task = Task.objects.get(id=id)
+    except Task.DoesNotExist:
+        raise TaskNotFoundException()
     return task
 
 
@@ -60,10 +64,9 @@ def get_start_task_by_company(company):
     try:
         task = Task.objects.get(creater__company=company,
                                 is_start=True)
-        task_address = task.task_addresses.get()
-        return task_address
-    except:
-        return None
+        return task
+    except Task.DoesNotExist:
+        raise StartTaskNotExistException()
 
 
 def get_tasks_without_address(user):

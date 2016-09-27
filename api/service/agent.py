@@ -3,11 +3,13 @@ import pickle
 import hashlib
 from datetime import datetime
 import json
+from random import randrange
 
 from django.contrib.auth.models import User
 from api.utils.exceptions.user import LoginAlredyExistException
 from api.utils.exceptions.subscription import AgentLimitException
 from rest_framework.exceptions import NotFound
+from django.core.cache import cache
 
 from api.models.agent import Agent
 from api.models.purse import Purse
@@ -16,6 +18,8 @@ from api.models.support import Support
 from base_service import get_object, auth_user
 from api.utils.exceptions.company import GroupNotFoundException, \
     AgentNotFoundException
+from api.utils.exceptions.user import TokenOrCodeInvalidException
+from api.utils.exceptions.auth import InvalidLoginException, InvalidPhoneException
 
 
 def create_agent_start(serializer, request_user):
@@ -55,9 +59,8 @@ def delete_agent(agent):
 def update_agent(agent, serializer, group):
     old_login = agent.user.username
     new_login = serializer.validated_data['login']
-    print old_login, new_login
     if (new_login != old_login) and (User.objects.filter(username=new_login).exists()):
-        raise LoginAlredyExistException
+        raise LoginAlredyExistException()
 
     serializer.update(agent, serializer.validated_data, group)
 
@@ -66,17 +69,14 @@ def get_agent_by_user(user):
     try:
         agent = Agent.get_agent_by_user(user)
     except Agent.DoesNotExist:
-        raise NotFound()
+        raise AgentNotFoundException()
     return agent
 
 def get_all_agents():
     return Agent.objects.all()
 
 def is_first_auth(agent):
-    if agent.platform:
-        return False
-    else:
-        return True
+    return not bool(agent.platform)
 
 def set_agent_device(agent, serializer, start_task):
     agent.device_id = serializer.validated_data['device_id']
@@ -86,9 +86,52 @@ def set_agent_device(agent, serializer, start_task):
     company = agent.company
     screens = json.loads(company.screens)
     #TODO отправлять логотип при первом заходе или каждый раз?
-
-    start_task_id = start_task.id
+    if start_task:
+        start_task_id = start_task.task_addresses.get().id
+    else:
+        start_task_id = None
     data = {'screens': screens,
             'start_task_id': start_task_id}
 
     return data
+
+
+def recover_password_start(form):
+    phone = form.cleaned_data['phone']
+    data = {}
+    try:
+        agent = Agent.objects.get(phone=phone)
+    except Agent.DoesNotExist:
+        raise InvalidPhoneException()
+
+    code = str(randrange(9)) + str(randrange(9)) + str(randrange(9)) + str(randrange(9))
+    #TODO несколько agent с одним телефоном
+    token = hashlib.sha256(agent.user.username + str(datetime.now())).hexdigest()
+    #TODO отправка кода подтверждения
+    cache.set('{0}_{1}'.format(token, code), pickle.dumps(agent), 60*60*24)
+    data['token'] = token
+    data['code'] = code
+    data['login'] = agent.user.username
+    return data
+
+
+def recover_password_finish(serializer):
+    token = serializer.cleaned_data['token']
+    password = serializer.cleaned_data['password']
+    login = serializer.cleaned_data['login']
+    code = serializer.cleaned_data['code']
+
+
+    try:
+        agent = pickle.loads(cache.get('{0}_{1}'.format(token, code)))
+    except TypeError:
+        raise TokenOrCodeInvalidException()
+
+    if agent.user.username != login:
+        raise InvalidLoginException()
+
+    cache.delete('{0}_{1}'.format(token, code))
+    agent.user.set_password(password)
+    agent.user.save()
+
+    return auth_user(login, password)

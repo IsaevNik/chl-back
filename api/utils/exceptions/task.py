@@ -35,3 +35,9 @@ class TaskAmountException(AbstractException):
 
 class TaskAlreadyInWorkException(AbstractException):
     pass
+
+class TaskNotFoundException(AbstractException):
+    pass
+
+class StartTaskNotExistException(AbstractException):
+    pass

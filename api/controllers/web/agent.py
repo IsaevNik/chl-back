@@ -62,15 +62,13 @@ class AgentDetailView(APIView):
 
     def get(self, request, id):
         agent = get_agent_by_id(id)
-        group = agent.group
-        self.check_object_permissions(self.request, group)
+        self.check_object_permissions(self.request, agent.group)
         serializer = AgentDetailSerializer(agent)
         return Response(serializer.data)
 
     def delete(self, request, id):
         agent = get_agent_by_id(id)
-        group = agent.group
-        self.check_object_permissions(self.request, group)
+        self.check_object_permissions(self.request, agent.group)
         delete_agent(agent)
         return Response()
 
@@ -82,7 +80,7 @@ class AgentDetailView(APIView):
         
         if serializer.is_valid():
             new_group_id = serializer.validated_data['group_id']
-            new_group = get_group_by_id(new_group_id, request.user)
+            new_group = get_group_by_id(new_group_id)
             self.check_object_permissions(self.request, old_group)
             self.check_object_permissions(self.request, new_group)
             update_agent(agent, serializer, new_group)

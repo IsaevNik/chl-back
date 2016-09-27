@@ -16,4 +16,5 @@ class CompanyNotFoundException(AbstractException):
     pass
 
 class AgentNotFoundException(AbstractException):
-	pass
+    pass
+

@@ -18,7 +18,7 @@ from ...utils.exceptions.commons import RequestValidationException
 from ...utils.exceptions.admin import EditYourSelfException
 from ..renderers import JsonRenderer
 from api.models.support import Support
-from api.forms import RecoverPasswordForm
+from api.forms import RecoverPasswordSupportForm
 
 
 class LoginSupportView(APIView):
@@ -154,7 +154,7 @@ class RecoverPasswordStartView(APIView):
     renderer_classes = (JsonRenderer,)
 
     def post(self, request):
-        form = RecoverPasswordForm(request.POST)
+        form = RecoverPasswordSupportForm(request.POST)
         if form.is_valid():
             token = recover_password_start(form)
             return Response({'token': token})

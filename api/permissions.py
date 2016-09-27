@@ -140,6 +140,25 @@ class IsSupportInstance(permissions.BasePermission):
         return True
 
 #checked
+class IsAgentInstance(permissions.BasePermission):
+    def has_permission(self, request, view):
+        try:
+            agent = Agent.get_agent_by_user(request.user)
+        except Agent.DoesNotExist:
+            return False
+        return True
+
+
+class IsAgent(permissions.BasePermission):
+    def has_permission(self, request, view):
+        try:
+            agent = Agent.get_agent_by_user(request.user)
+        except Agent.DoesNotExist:
+            return False
+        return True
+
+
+#checked
 class IsSupportOrAdminOrSuperAdminRO(permissions.BasePermission):
     def has_permission(self, request, view):
         try:
@@ -148,6 +167,15 @@ class IsSupportOrAdminOrSuperAdminRO(permissions.BasePermission):
                    (support.is_superadmin and request.method in permissions.SAFE_METHODS)
         except Support.DoesNotExist:
             return False
+
+#checked
+class IsCompanyStuff(permissions.BasePermission):
+    def has_permission(self, request, view):
+        try:
+            support = Support.get_support_by_user(request.user)
+        except Support.DoesNotExist:
+            return False
+        return support.is_admin or support.is_operator
 
 
 class IsSupport(permissions.BasePermission):
@@ -192,14 +220,6 @@ class IsAdminOrAgentOfYourGroup(permissions.BasePermission):
         else:
             return False
 
-
-class IsAgent(permissions.BasePermission):
-    def has_permission(self, request, view):
-        try:
-            agent = Agent.get_agent_by_user(request.user)
-        except Agent.DoesNotExist:
-            return False
-        return True
 
 
 class IsThisPayAgent(permissions.BasePermission):

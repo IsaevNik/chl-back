@@ -16,3 +16,5 @@ class FamilyAlreadyExistException(AbstractException):
 class LoginAlredyExistException(AbstractException):
     pass
         
+class TokenOrCodeInvalidException(AbstractException):
+	pass

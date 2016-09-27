@@ -9,3 +9,11 @@ class InvalidCredentialsException(AbstractException):
 
 class InvalidEmailException(AbstractException):
     pass
+
+
+class InvalidLoginException(AbstractException):
+	pass
+
+
+class InvalidPhoneException(AbstractException):
+    pass

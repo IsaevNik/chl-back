@@ -48,5 +48,10 @@ errors = {
     'SubscriptionTypeNotFoundException': u"Нет такого типа подписки",
     'SubscriptionStatusException': u"Вы не можете создать подписку с таким статусом",
     'SubscriptionNotFoundException': u"Операции с заданным идентификатором не существует",
-    'AgentNotFoundException': u"Агент с таким идентификатором не существует"
+    'AgentNotFoundException': u"Агент с таким идентификатором не существует",
+    'InvalidPhoneException': u"В системе не зарегестрирован пользователь с таким телефоном",
+    'TokenOrCodeInvalidException': u"Код активации или токен - не валидны",
+    'InvalidLoginException': u"Нет пользователя с таким логином",
+    'TaskNotFoundException': u"Задания с таким идентификатором не существует",
+    'StartTaskNotExistException': u"В вашей компании не создано вводное задание"
 }

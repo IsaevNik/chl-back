@@ -6,12 +6,12 @@ from django.utils import timezone
 from api.models.task_filled import TaskFilled
 from api.models.task import Task
 from api.models.task_address import TaskAddress
-from task import TaskForManySerializer
+from task import TaskListSerializer
 from point_filled import PointFilledSerializer
 from agent import AgentListSerializer
 from task_address import TaskWithAddressSerializer
  
-class TaskForDetailSerializer(TaskForManySerializer):
+class TaskForDetailSerializer(TaskListSerializer):
     blanks = serializers.IntegerField(source='blanks_count')
 
 # MOBILE VERSION

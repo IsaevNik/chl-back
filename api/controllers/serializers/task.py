@@ -8,7 +8,14 @@ from task_address import TaskAddressSerializer
 from point_blank import PointBlankSerializer
 
 
-class TaskSerializer(serializers.ModelSerializer):
+class TaskListSerializer(serializers.ModelSerializer):
+    task_addresses = serializers.IntegerField(source='task_adresses_count')
+
+    class Meta:
+        model = Task
+        fields = ('id', 'client_name', 'title', 'task_addresses')
+
+class TaskDetailSerializer(serializers.ModelSerializer):
 
     last_editor = serializers.CharField(source='last_editor.name')
     creater = serializers.CharField(source='creater.name')
@@ -24,21 +31,18 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task
         fields = ('id', 'client_name', 'title', 'description',
             'creater', 'last_editor', 'price', 'start_dt', 'finish_dt', 
-            'release_dt', 'create_dt', 'last_edit_dt', 'execute_t', 'is_start', 
+            'release_dt', 'create_dt', 'last_edit_dt', 'is_start', 
             'blanks', 'task_addresses')
-
-
-class TaskForManySerializer(TaskSerializer):
-    task_addresses = serializers.IntegerField(source='task_adresses_count')
 
 
 class GroupWithTaskSerializer(serializers.ModelSerializer):
 
-    tasks = TaskForManySerializer(many=True, read_only=True)
+    tasks = TaskListSerializer(many=True, read_only=True)
     group_name = serializers.CharField(source='name')
     class Meta:
         model = UserGroup
         fields = ('group_name', 'tasks')
+
 
 class TaskCreateSerializer(serializers.Serializer):
     client_name = serializers.CharField()
@@ -48,7 +52,7 @@ class TaskCreateSerializer(serializers.Serializer):
     start_dt = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S")
     finish_dt = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S")
     is_start = serializers.IntegerField(default=0)
-    group_id = serializers.IntegerField(required=False)
+    group_id = serializers.IntegerField(required=False, allow_null=True)
 
 
     def create(self, validated_data, support, group):
