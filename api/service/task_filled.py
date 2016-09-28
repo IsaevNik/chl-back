@@ -12,7 +12,7 @@ from base_service import get_object, save_image, is_support
 from api.controllers.serializers.point_filled import PointFilledCreateSerializer
 from api.forms import UploadFileForm
 from ..utils.exceptions.commons import RequestValidationException
-from ..utils.exceptions.inwork import TaskStatusException
+from ..utils.exceptions.inwork import TaskStatusException, TaskFilledNotFoundException
 
 
 def get_task_inwork_by_status(status, user):
@@ -46,8 +46,12 @@ def get_stat_inwork(support):
     return data_stat
     
 
-def get_task_filled(id):
-    return get_object(TaskFilled, id)
+def get_task_filled_by_id(id):
+    try:
+        task_filled = TaskFilled.objects.get(id=id)
+    except TaskFilled.DoesNotExist:
+        raise TaskFilledNotFoundException()
+    return task_filled
 
 
 def do_the_task(request, task_filled, serializer):

@@ -2,7 +2,7 @@
 from django.utils import timezone
 
 from ..utils.exceptions.pay import LowBalanceException, PayStatusException, \
-    PayAlreadyCheckException
+    PayAlreadyCheckException, PayNotFoundException
 from api.models.pay import Pay
 from base_service import get_object
 
@@ -19,7 +19,11 @@ def get_pays_by_agent(agent):
 
 
 def get_pay_by_id(id):
-    return get_object(Pay, id)
+    try:
+        pay = Pay.objects.get(id=id)
+    except Pay.DoesNotExist:
+        raise PayNotFoundException()
+    return pay
 
 
 def get_list_of_pay_by_status(support, status):

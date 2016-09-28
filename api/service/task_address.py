@@ -2,7 +2,7 @@
 from django.utils import timezone
 
 from ..utils.exceptions.task import AddressNotExistException, TaskTimeException, \
-    TaskAmountException, TaskAlreadyInWorkException
+    TaskAmountException, TaskAlreadyInWorkException, TaskAddressNotFoundException
 from api.models.task_address import TaskAddress
 from api.models.task_filled import TaskFilled
 from base_service import get_object
@@ -13,7 +13,7 @@ def create_task_address(serializer, task, support):
        not (data['longitude'] or data['latitude'] or data['address']):
         serializer.create(serializer.data, task)
     else:
-        raise AddressNotExistException
+        raise AddressNotExistException()
 
 
 def update_task_address(serializer, task, ids):
@@ -35,9 +35,12 @@ def delete_task_addresses(ids):
         task_address.delete()
 
     
-def get_task_address(id):
-    task = get_object(TaskAddress, id)
-    return task
+def get_task_address_by_id(id):
+    try:
+        task_address = TaskAddress.objects.get(id=id)
+    except TaskAddress.DoesNotExist:
+        raise TaskAddressNotFoundException()
+    return task_address
 
 def is_task_available(task_address):
     task = task_address.task

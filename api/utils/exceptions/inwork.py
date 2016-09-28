@@ -21,3 +21,7 @@ class CancelTaskException(AbstractException):
 
 class DoTaskException(AbstractException):
 	pass
+
+
+class TaskFilledNotFoundException(AbstractException):
+	pass

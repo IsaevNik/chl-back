@@ -6,10 +6,11 @@ from rest_framework.views import APIView
 from django.db import transaction
 
 from ..renderers import JsonRenderer
-from api.permissions import IsAdminOrGroupSupport, IsSupport, IsAdminOrAgentOfYourGroup
+from api.permissions import IsAdminOrGroupSupport, IsAdminOrAgentOfYourGroup, \
+    IsCompanyStuff, IsCompanyActive
 from ...service.support import get_support_by_user
 from ...service.task_filled import get_task_inwork_by_status, get_stat_inwork, \
-    get_task_filled, check_task
+    get_task_filled_by_id, check_task
 from ..serializers.task_filled import TaskFilledListWebSerializer, TaskFilledDetailWebSerializer, \
     CheckingTaskSerializer
 from api.utils.exceptions.inwork import TaskNotDoneException, TaskMustNotBeCheckingException
@@ -18,7 +19,7 @@ from ...utils.exceptions.commons import RequestValidationException
 
 class InWorkTasksListView(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsSupport, )
+    permission_classes = (IsAuthenticated, IsCompanyStuff, IsCompanyActive)
     renderer_classes = (JsonRenderer,)
 
     def get(self, request, status):
@@ -30,7 +31,7 @@ class InWorkTasksListView(APIView):
 
 class InWorkStatsView(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsSupport, )
+    permission_classes = (IsAuthenticated, IsCompanyStuff, )
     renderer_classes = (JsonRenderer,)
 
     def get(self, request):
@@ -41,11 +42,11 @@ class InWorkStatsView(APIView):
 
 class InWorkTaskDetailView(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsAdminOrAgentOfYourGroup, )
+    permission_classes = (IsAuthenticated, IsAdminOrAgentOfYourGroup, IsCompanyActive)
     renderer_classes = (JsonRenderer,)
 
     def get(self, request, id):
-        task_filled = get_task_filled(id)
+        task_filled = get_task_filled_by_id(id)
         agent = task_filled.executer
         self.check_object_permissions(self.request, agent)
 
@@ -56,7 +57,7 @@ class InWorkTaskDetailView(APIView):
 
     @transaction.atomic
     def post(self, request, id):
-        task_filled = get_task_filled(id)
+        task_filled = get_task_filled_by_id(id)
         agent = task_filled.executer
         self.check_object_permissions(self.request, agent)
 
@@ -70,9 +71,10 @@ class InWorkTaskDetailView(APIView):
             raise RequestValidationException(serializer)
         return Response()
 
+
 class InWorkHistoryView(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsSupport, )
+    permission_classes = (IsAuthenticated, IsCompanyStuff, )
     renderer_classes = (JsonRenderer,)
 
     def get(self, request):

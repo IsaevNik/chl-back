@@ -35,6 +35,8 @@ def get_all_groups_of_company(user):
 
 
 def get_group_by_id(id):
+    if not id:
+        return None
     try:
         group = UserGroup.objects.get(id=id)
     except UserGroup.DoesNotExist:

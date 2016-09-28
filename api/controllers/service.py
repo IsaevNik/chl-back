@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view, renderer_classes, \
     permission_classes, authentication_classes
 
 from ..service.base_service import save_image
-from api.permissions import IsSupport
+from api.permissions import IsCompanyStuff
 from .renderers import JsonRenderer
 from api.forms import UploadFileForm
 from ..utils.exceptions.commons import RequestValidationException
@@ -15,7 +15,7 @@ from ..utils.exceptions.commons import RequestValidationException
 @api_view(['POST'])
 @renderer_classes([JsonRenderer])
 @authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated, IsSupport])
+@permission_classes([IsAuthenticated, IsCompanyStuff])
 def uploadImg(request):
     form = UploadFileForm(request.POST, request.FILES)
     if form.is_valid():

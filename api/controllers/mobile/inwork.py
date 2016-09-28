@@ -7,15 +7,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db import transaction
 
-from ...service.task_filled import get_task_filled
 from ..serializers.task_filled import TaskFilledUpdateSerializer, \
     TaskFilledListMobileSerializer
 from ...service.agent import get_agent_by_user
 from ...service.task_filled import do_the_task, cancel_the_task, \
-    get_task_inwork_by_status, get_task_inwork_by_user
+    get_task_inwork_by_status, get_task_inwork_by_user, get_task_filled_by_id
 from ...service.task import get_point_blanks_by_task
 from ..serializers.point_blank import PointBlankSerializer
-from api.permissions import IsThisTaskExecuter
+from api.permissions import IsThisTaskExecuter, IsAgentInstance
 from api.forms import TaskDistanceForm
 from ..renderers import JsonRenderer
 from ...utils.exceptions.commons import RequestValidationException
@@ -28,7 +27,7 @@ class BlanksOfTaskView(APIView):
     renderer_classes = (JsonRenderer,)
 
     def get(self, request, id):
-        task_filled = get_task_filled(id)
+        task_filled = get_task_filled_by_id(id)
         self.check_object_permissions(self.request, task_filled)
 
         point_blanks = get_point_blanks_by_task(task_filled.task_address.task)
@@ -43,7 +42,7 @@ class InWorkTaskDetailView(APIView):
 
     @transaction.atomic
     def post(self, request, id):
-        task_filled = get_task_filled(id)
+        task_filled = get_task_filled_by_id(id)
         self.check_object_permissions(self.request, task_filled)
         if task_filled.status != 0:
             raise DoTaskException()
@@ -57,7 +56,7 @@ class InWorkTaskDetailView(APIView):
 
     @transaction.atomic
     def delete(self, request, id):
-        task_filled = get_task_filled(id)
+        task_filled = get_task_filled_by_id(id)
         self.check_object_permissions(self.request, task_filled)
         if task_filled.status != 0:
             raise CancelTaskException()
@@ -67,7 +66,7 @@ class InWorkTaskDetailView(APIView):
 
     def get(self, request, id):
         form = TaskDistanceForm(request.GET)
-        task_filled = get_task_filled(id)
+        task_filled = get_task_filled_by_id(id)
         self.check_object_permissions(self.request, task_filled)
         if form.is_valid():
             if task_filled.task_address.latitude:
@@ -79,10 +78,9 @@ class InWorkTaskDetailView(APIView):
             raise RequestValidationException(form)
          
 
-
-class InWorkTasksListView(APIView):
+class InWorkTasksByStatusListView(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsAgentInstance)
     renderer_classes = (JsonRenderer,)
 
     def get(self, request, status):
@@ -94,7 +92,7 @@ class InWorkTasksListView(APIView):
 
 class InWorkAgentsTaskListView(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsAgentInstance)
     renderer_classes = (JsonRenderer,)
 
     def get(self, request):
@@ -111,7 +109,7 @@ class InWorkAgentsTaskListView(APIView):
 
 class InWorkAgentsHistoryListView(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsAgentInstance)
     renderer_classes = (JsonRenderer,)
 
     def get(self, request):

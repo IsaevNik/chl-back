@@ -7,20 +7,19 @@ from django.db import transaction
 
 from ..serializers.task_address import TaskWithoutAddressSerializer, \
     TaskWithAddressSerializer
-from ...service.task import get_tasks_without_address, get_tasks_with_address, \
-    get_point_blanks_by_task
+from ...service.task import get_tasks_without_address, get_tasks_with_address
 from ...service.agent import get_agent_by_user
-from ...service.task_address import is_task_available, get_task_address, \
+from ...service.task_address import is_task_available, get_task_address_by_id, \
     taken_task_by_agent
 from ..renderers import JsonRenderer
 from api.forms import TaskDistanceForm
 from ...utils.exceptions.commons import RequestValidationException
-from api.permissions import IsThisGroupMember
+from api.permissions import IsForThisAgentTask, IsAgentInstance
 
 
 class WithoutAddressTaskView(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsAgentInstance)
     renderer_classes = (JsonRenderer,)
 
     def get(self, request):
@@ -29,10 +28,9 @@ class WithoutAddressTaskView(APIView):
         return Response(serializer.data)
 
 
-
 class WithAddressTaskView(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsAgentInstance)
     renderer_classes = (JsonRenderer,)
 
     def get(self, request):
@@ -48,14 +46,13 @@ class WithAddressTaskView(APIView):
 
 class TaskForAgentView(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsThisGroupMember)
+    permission_classes = (IsAuthenticated, IsForThisAgentTask)
     renderer_classes = (JsonRenderer,)
 
     def get(self, request, id):
-        task_address = get_task_address(id)
+        task_address = get_task_address_by_id(id)
         task = task_address.task
-        group = task.group
-        self.check_object_permissions(self.request, group)
+        self.check_object_permissions(self.request, task)
         is_task_available(task_address)
 
         serializer = TaskWithAddressSerializer(task_address)
@@ -63,11 +60,10 @@ class TaskForAgentView(APIView):
 
     @transaction.atomic
     def post(self, request, id):
-        task_address = get_task_address(id)
+        task_address = get_task_address_by_id(id)
         agent = get_agent_by_user(request.user)
         task = task_address.task
-        group = task.group
-        self.check_object_permissions(self.request, group)
+        self.check_object_permissions(self.request, task)
         is_task_available(task_address)
 
         taken_task_by_agent(task_address ,agent)

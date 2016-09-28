@@ -41,7 +41,7 @@ class GroupWithTaskSerializer(serializers.ModelSerializer):
     group_name = serializers.CharField(source='name')
     class Meta:
         model = UserGroup
-        fields = ('group_name', 'tasks')
+        fields = ('id', 'group_name', 'tasks')
 
 
 class TaskCreateSerializer(serializers.Serializer):

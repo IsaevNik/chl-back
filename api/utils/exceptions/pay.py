@@ -17,3 +17,7 @@ class PayStatusException(AbstractException):
 
 class PayAlreadyCheckException(AbstractException):
 	pass
+
+
+class PayNotFoundException(AbstractException):
+	pass

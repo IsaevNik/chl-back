@@ -6,7 +6,7 @@ from api.controllers.web.pay import PaysListView, PaysDetailView, \
 
 urlpatterns = [
     url(r'^$', PaysListView.as_view()),
-    url(r'^(P<id>[0-9]+)/$', PaysDetailView.as_view()),
+    url(r'^(?P<id>[0-9]+)/$', PaysDetailView.as_view()),
     url(r'^history/$', PaysHistoryListView.as_view()),
 
 ]

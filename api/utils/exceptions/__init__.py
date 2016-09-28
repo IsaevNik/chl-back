@@ -53,5 +53,9 @@ errors = {
     'TokenOrCodeInvalidException': u"Код активации или токен - не валидны",
     'InvalidLoginException': u"Нет пользователя с таким логином",
     'TaskNotFoundException': u"Задания с таким идентификатором не существует",
-    'StartTaskNotExistException': u"В вашей компании не создано вводное задание"
+    'StartTaskNotExistException': u"В вашей компании не создано вводное задание",
+    'StartTaskDeleteException': u"Нельзя удалить стартовое задание, попробуйте изменить его",
+    'TaskFilledNotFoundException': u"Задания в работе с таким идентификатором не существует",
+    'TaskAddressNotFoundException': u"Задания с таким идентификатором не найдено",
+    'PayNotFoundException': u"Операция поощрения с таким идентификатором не найдена"
 }

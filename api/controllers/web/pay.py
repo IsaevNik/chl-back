@@ -9,14 +9,14 @@ from ..renderers import JsonRenderer
 from ...service.support import get_support_by_user
 from ...service.pay import create_pay, get_list_of_pay_by_status, \
     get_pay_by_id, check_pay_request
-from api.permissions import IsAdminOrGroupSupport, IsSupport
+from api.permissions import IsAdminOrGroupSupport, IsCompanyStuff, IsCompanyActive
 from ..serializers.pay import PaySerializer, PayDetailWebSerializer, \
     PayUpdateSerializer, PayHistoryWebSerializer
 
 
 class PaysListView(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsSupport)
+    permission_classes = (IsAuthenticated, IsCompanyStuff)
     renderer_classes = (JsonRenderer,)
     
     def get(self, request):
@@ -28,11 +28,12 @@ class PaysListView(APIView):
 
 class PaysDetailView(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsAdminOrGroupSupport)
+    permission_classes = (IsAuthenticated, IsAdminOrGroupSupport, IsCompanyActive)
     renderer_classes = (JsonRenderer,)
 
     def get(self, request, id):
         pay = get_pay_by_id(id)
+        print "d"
         self.check_object_permissions(self.request, pay.agent.group)
 
         serializer = PayDetailWebSerializer(pay)
@@ -51,7 +52,7 @@ class PaysDetailView(APIView):
 
 class PaysHistoryListView(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, IsSupport)
+    permission_classes = (IsAuthenticated, IsCompanyStuff)
     renderer_classes = (JsonRenderer,)
     
     def get(self, request):

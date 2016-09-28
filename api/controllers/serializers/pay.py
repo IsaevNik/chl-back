@@ -13,11 +13,14 @@ class PaySerializer(serializers.ModelSerializer):
     '''
     promos = serializers.CharField(source='agent.group.promos.title')
     request_dt = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
-    agent = serializers.CharField(source='agent.name')
+    agent = serializers.SerializerMethodField()
 
     class Meta:
         model = Pay
         fields = ('id', 'agent', 'request_dt', 'promos')
+
+    def get_agent(self, obj):
+        return {"id": obj.agent.id, "name": obj.agent.name}
 
 
 class PayDetailWebSerializer(PaySerializer):

@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.exceptions import PermissionDenied
 from django.db import transaction
+from django.shortcuts import redirect
 
 from ..serializers.task import TaskCreateSerializer, GroupWithTaskSerializer, \
     TaskDetailSerializer
@@ -23,9 +24,9 @@ from ...service.point_blank import create_blank, update_blank, delete_blanks
 from ..renderers import JsonRenderer
 from ...utils.exceptions.commons import RequestValidationException
 from ...utils.exceptions.task import WithoutGroupTaskCreateException, \
-    StartTaskWithGroupException, StartTaskCreateException
-from api.permissions import IsAdminOrGroupSupport, IsSupport, IsAdminOrReadOnly, \
-    IsCompanyStuff, IsCompanyActiveOrReadOnly
+    StartTaskWithGroupException, StartTaskCreateException, StartTaskDeleteException
+from api.permissions import IsAdminOrGroupSupport, IsAdminOrReadOnly, \
+    IsCompanyStuff, IsCompanyActiveOrReadOnly, IsSupportTask
 
 
 class TaskListView(APIView):
@@ -202,22 +203,17 @@ class TaskDetailView(APIView):
 
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated, IsCompanyStuff, \
-                          IsAdminOrGroupSupport, IsCompanyActiveOrReadOnly)
+                          IsSupportTask, IsCompanyActiveOrReadOnly)
     renderer_classes = (JsonRenderer,)
 
 
     def get(self, request, id):
         support = get_support_by_user(request.user)
         task = get_task_by_id(id)
-        group = task.group
-
-        #если запросили стартовое задание
-        if not group:
-            start_task = get_start_task_by_company(support.company)
-            if task != start_task:
-                raise PermissionDenied()
-        else:    
-            self.check_object_permissions(self.request, group)
+        
+        self.check_object_permissions(self.request, task)
+        if task.is_start:
+            return redirect('/api/web/tasks/start/')
         
         serializer = TaskDetailSerializer(task)
         return Response(serializer.data)
@@ -227,19 +223,8 @@ class TaskDetailView(APIView):
     def put(self, request, id):
         support = get_support_by_user(request.user)
         task = get_task_by_id(id)
-        old_group = task.group
 
-        if not old_group and not support.is_admin:
-            raise PermissionDenied()
-
-        if not old_group and support.is_admin:
-            start_task = get_start_task_by_company(support.company)
-            if task != start_task:
-                raise PermissionDenied()
-
-        #проверка прав на старую группу
-        if old_group:    
-            self.check_object_permissions(self.request, old_group)
+        self.check_object_permissions(self.request, task)
 
         form = JsonReqForm(request.data)
         if not form.is_valid():
@@ -250,6 +235,19 @@ class TaskDetailView(APIView):
         task_serializer = TaskCreateSerializer(data=data_for_task)
         if not task_serializer.is_valid():
             raise RequestValidationException(task_serializer)
+
+        
+        #проверка прав на новую группу    
+        new_group = get_group_by_id(task_serializer.validated_data['group_id'])
+        if new_group:
+            if not (new_group.support == support or 
+                new_group.support.company == support.company and support.is_admin):
+                raise PermissionDenied()
+        else:
+            #TODO redirect если задание вводное
+            return redirect('/api/web/tasks/start/')
+            raise PermissionDenied()
+
         #проверяем валидность данных для адресов заданий и записываем в массив 
         #идентификаторы заданий которые остались из старой версии задания
         ta_ids = []
@@ -272,12 +270,6 @@ class TaskDetailView(APIView):
                     b_ids.append(id)
             else:
                 raise RequestValidationException(b_serializer)
-        #проверка прав на новую группу    
-        new_group = get_group_by_id(task_serializer.validated_data['group_id'])
-        if new_group:
-            self.check_object_permissions(self.request, new_group)
-        else:
-            new_group = None
 
         task = update_task(task_serializer, task, support, new_group)
 
@@ -305,19 +297,10 @@ class TaskDetailView(APIView):
     def delete(self, request, id):
         support = get_support_by_user(request.user)
         task = get_task_by_id(id)
-        group = task.group
 
-        if not group and not support.is_admin:
-            raise PermissionDenied()
-
-        if not group and support.is_admin:
-            start_task = get_start_task_by_company(support.company)
-            if task != start_task:
-                raise PermissionDenied()
-
-        if group:    
-            self.check_object_permissions(self.request, group)
-        #TODO проверка, если задание вводное, то запретить удаление
+        self.check_object_permissions(self.request, task)
+        if task.is_start:
+            raise StartTaskDeleteException()
         task.delete()
         return Response()
 

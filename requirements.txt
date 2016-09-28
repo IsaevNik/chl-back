@@ -1,5 +1,4 @@
 django==1.10.0
 djangorestframework==3.4.4
-redis==2.10.5
 django-redis-cache==1.6.5
 django-rest-swagger==2.0.5

@@ -41,3 +41,9 @@ class TaskNotFoundException(AbstractException):
 
 class StartTaskNotExistException(AbstractException):
     pass
+
+class StartTaskDeleteException(AbstractException):
+    pass
+
+class TaskAddressNotFoundException(AbstractException):
+    pass

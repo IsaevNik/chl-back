@@ -69,15 +69,18 @@ class TaskFilledDetailWebSerializer(serializers.ModelSerializer):
     take_dt = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S")
     end_dt = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S")
     check_dt = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S")
-    task = TaskForDetailSerializer(source='task_address.task')
+    task = TaskShortWebSerializer(source='task_address.task')
     filled_blanks = PointFilledSerializer(many=True)
-    executer = AgentListSerializer()
+    executer = serializers.SerializerMethodField()
 
     class Meta:
         model = TaskFilled
         depth = 1
         fields = ('id', 'task_address', 'task', 'executer', 'take_dt', 'end_dt', \
                   'check_dt', 'longitude', 'latitude', 'filled_blanks')
+
+    def get_executer(self, obj):
+        return {"id": obj.executer.id, "name": obj.executer.name}
 #####
 
 class TaskFilledUpdateSerializer(serializers.Serializer):
